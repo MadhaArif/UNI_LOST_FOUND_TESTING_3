@@ -21,12 +21,12 @@ OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 # Initialize FastAPI app
 app = FastAPI(title="UMT Belongings Hub API", version="1.0.0")
 
-# CORS middleware
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
 
@@ -99,26 +99,44 @@ async def openai_visual_search(image_base64: str, items: List[Dict]) -> List[Dic
     except Exception:
         return await simple_image_similarity(image_base64, items)
 
-# Serve HTML pages
-@app.get("/", response_class=HTMLResponse)
-async def serve_index():
-    with open("/app/frontend/index.html", "r") as f:
-        return HTMLResponse(content=f.read())
+# Health check
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint"""
+    try:
+        # Test database connection
+        await db.lost_items.find_one()
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy", 
+            "database": "disconnected",
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
 
-@app.get("/lost", response_class=HTMLResponse)
-async def serve_lost():
-    with open("/app/frontend/lost.html", "r") as f:
-        return HTMLResponse(content=f.read())
-
-@app.get("/found", response_class=HTMLResponse)
-async def serve_found():
-    with open("/app/frontend/found.html", "r") as f:
-        return HTMLResponse(content=f.read())
-
-@app.get("/report-lost", response_class=HTMLResponse)
-async def serve_report_lost():
-    with open("/app/frontend/report-lost.html", "r") as f:
-        return HTMLResponse(content=f.read())
+# Root API endpoint
+@app.get("/api/")
+async def root():
+    """Root API endpoint"""
+    return {
+        "message": "UMT Belongings Hub API is running",
+        "version": "1.0.0",
+        "endpoints": {
+            "quick_search": "/api/search/quick",
+            "visual_search": "/api/search/visual", 
+            "search_items": "/api/search/items",
+            "report_lost": "/api/items/lost",
+            "report_found": "/api/items/found",
+            "get_lost_items": "/api/items/lost",
+            "get_found_items": "/api/items/found",
+            "health": "/api/health"
+        }
+    }
 
 # API Routes - Main functionality
 
@@ -418,44 +436,26 @@ async def get_item(item_type: str, item_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch item: {str(e)}")
 
-# Health check
-@app.get("/api/health")
-async def health_check():
-    """Health check endpoint"""
-    try:
-        # Test database connection
-        await db.lost_items.find_one()
-        return {
-            "status": "healthy",
-            "database": "connected",
-            "timestamp": datetime.utcnow().isoformat()
-        }
-    except Exception as e:
-        return {
-            "status": "unhealthy",
-            "database": "disconnected",
-            "error": str(e),
-            "timestamp": datetime.utcnow().isoformat()
-        }
+# Serve HTML pages
+@app.get("/", response_class=HTMLResponse)
+async def serve_index():
+    with open("/app/frontend/index.html", "r") as f:
+        return HTMLResponse(content=f.read())
 
-# Root API endpoint
-@app.get("/api/")
-async def root():
-    """Root API endpoint"""
-    return {
-        "message": "UMT Belongings Hub API is running",
-        "version": "1.0.0",
-        "endpoints": {
-            "quick_search": "/api/search/quick",
-            "visual_search": "/api/search/visual", 
-            "search_items": "/api/search/items",
-            "report_lost": "/api/items/lost",
-            "report_found": "/api/items/found",
-            "get_lost_items": "/api/items/lost",
-            "get_found_items": "/api/items/found",
-            "health": "/api/health"
-        }
-    }
+@app.get("/lost", response_class=HTMLResponse)
+async def serve_lost():
+    with open("/app/frontend/lost.html", "r") as f:
+        return HTMLResponse(content=f.read())
+
+@app.get("/found", response_class=HTMLResponse)
+async def serve_found():
+    with open("/app/frontend/found.html", "r") as f:
+        return HTMLResponse(content=f.read())
+
+@app.get("/report-lost", response_class=HTMLResponse)
+async def serve_report_lost():
+    with open("/app/frontend/report-lost.html", "r") as f:
+        return HTMLResponse(content=f.read())
 
 if __name__ == "__main__":
     import uvicorn
