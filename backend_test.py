@@ -202,6 +202,8 @@ class UMTLostAndFoundTester:
         assert response.status_code == 200, f"Lost search: Expected status code 200, got {response.status_code}"
         data = response.json()
         assert "items" in data, "Lost search: Response missing items array"
+        assert "success" in data, "Lost search: Response missing success field"
+        assert "message" in data, "Lost search: Response missing message field"
         
         # Test searching for found items
         search_data = {
@@ -218,6 +220,8 @@ class UMTLostAndFoundTester:
         assert response.status_code == 200, f"Found search: Expected status code 200, got {response.status_code}"
         data = response.json()
         assert "items" in data, "Found search: Response missing items array"
+        assert "success" in data, "Found search: Response missing success field"
+        assert "message" in data, "Found search: Response missing message field"
         
         # Test searching for both types
         search_data = {
@@ -234,6 +238,72 @@ class UMTLostAndFoundTester:
         assert response.status_code == 200, f"Both search: Expected status code 200, got {response.status_code}"
         data = response.json()
         assert "items" in data, "Both search: Response missing items array"
+        assert "success" in data, "Both search: Response missing success field"
+        assert "message" in data, "Both search: Response missing message field"
+        
+        # Test with specific date
+        today = datetime.now().strftime("%Y-%m-%d")
+        search_data = {
+            "searchType": "both",
+            "itemCategory": None,
+            "location": None,
+            "date": today
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/search/quick",
+            json=search_data
+        )
+        assert response.status_code == 200, f"Date search: Expected status code 200, got {response.status_code}"
+        data = response.json()
+        assert "items" in data, "Date search: Response missing items array"
+        
+        # Test with all parameters
+        search_data = {
+            "searchType": "lost",
+            "itemCategory": "Electronics",
+            "location": "Library",
+            "date": today
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/search/quick",
+            json=search_data
+        )
+        assert response.status_code == 200, f"All params search: Expected status code 200, got {response.status_code}"
+        data = response.json()
+        assert "items" in data, "All params search: Response missing items array"
+        
+        # Test with empty search (no parameters)
+        search_data = {
+            "searchType": "both",
+            "itemCategory": None,
+            "location": None,
+            "date": None
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/search/quick",
+            json=search_data
+        )
+        assert response.status_code == 200, f"Empty search: Expected status code 200, got {response.status_code}"
+        data = response.json()
+        assert "items" in data, "Empty search: Response missing items array"
+        
+        # Test with invalid search type
+        search_data = {
+            "searchType": "invalid",
+            "itemCategory": None,
+            "location": None,
+            "date": None
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/search/quick",
+            json=search_data
+        )
+        assert response.status_code == 200, f"Invalid type search: Expected status code 200, got {response.status_code}"
+        # The API should handle invalid search type gracefully
     
     @run_test
     def test_visual_search(self):
