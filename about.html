@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - UMT Belongings Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #48A6A7;
+            --secondary-color: #9ACBD0;
+            --accent-color: #006A71;
+            --light-color: #F2EFE7;
+            --dark-color: #006A71;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #F2EFE7, #9ACBD0);
+            padding-top: 80px;
+        }
+
+        .navbar {
+            background: var(--dark-color) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .about-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .team-member {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .team-member img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            border: 3px solid var(--primary-color);
+        }
+
+        .mission-vision {
+            background: var(--light-color);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats-section {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--primary-color);
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-content {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-search-location me-2"></i>UniLost & Found
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="lost.html">Lost Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="found.html">Found Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="about.html">About</a>
+                    </li>
+                </ul>
+                
+                <!-- Authentication buttons (same as index.html) -->
+                <div class="auth-buttons" id="loggedOutNav">
+                    <button class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#loginTypeModal">
+                        <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                    </button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#signupModal">
+                        <i class="fas fa-user-plus me-1"></i>Sign Up
+                    </button>
+                </div>
+
+                <div class="auth-buttons" id="loggedInNav" style="display: none;">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="userFullName">User Name</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="dashboard.html"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                            <li><a class="dropdown-item" href="my-posts.html"><i class="fas fa-list me-2"></i>My Posts</a></li>
+                            <li><a class="dropdown-item" href="my-requests.html"><i class="fas fa-handshake me-2"></i>My Requests</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a href="#" class="dropdown-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-5">
+        <!-- About Section -->
+        <div class="about-section">
+            <h1 class="text-center mb-4">About UMT Belongings Hub</h1>
+            <p class="lead text-center">Connecting Lost Items with Their Rightful Owners</p>
+            <p>UMT Belongings Hub is a dedicated platform designed to help University of Management and Technology students, faculty, and staff recover their lost items and return found belongings to their rightful owners. Our mission is to create a more caring and connected campus community by facilitating the return of lost possessions.</p>
+        </div>
+
+        <!-- Mission & Vision -->
+        <div class="mission-vision">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <h3><i class="fas fa-bullseye me-2"></i>Our Mission</h3>
+                    <p>To provide a user-friendly, efficient platform that helps UMT community members recover their lost belongings and promote a culture of responsibility and care on campus.</p>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <h3><i class="fas fa-eye me-2"></i>Our Vision</h3>
+                    <p>To create a campus environment where lost items are quickly and safely returned to their owners, fostering trust and community spirit within UMT.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number">1,250+</div>
+                        <div>Items Reunited</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number">850+</div>
+                        <div>Active Users</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number">95%</div>
+                        <div>Success Rate</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number">24/7</div>
+                        <div>Support</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="about-section">
+            <h3 class="text-center mb-4">How It Works</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h4><i class="fas fa-user-plus me-2"></i>Step 1: Create Account</h4>
+                        <p>Sign up using your UMT email address to verify your student status.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h4><i class="fas fa-edit me-2"></i>Step 2: Report Item</h4>
+                        <p>Report a lost item or submit details about an item you've found on campus.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h4><i class="fas fa-search me-2"></i>Step 3: Search & Match</h4>
+                        <p>Our system helps match lost items with found items based on descriptions and locations.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h4><i class="fas fa-handshake me-2"></i>Step 4: Connect & Retrieve</h4>
+                        <p>Connect with the finder/owner through our secure platform and arrange for item retrieval.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="about-section">
+            <h3 class="text-center mb-4">Contact Us</h3>
+            <div class="row">
+                <div class="col-md-4 text-center mb-4">
+                    <i class="fas fa-envelope fa-2x mb-3" style="color: var(--primary-color);"></i>
+                    <h5>Email</h5>
+                    <p>lostandfound@umt.edu.pk</p>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <i class="fas fa-phone fa-2x mb-3" style="color: var(--primary-color);"></i>
+                    <h5>Phone</h5>
+                    <p>+92 (42) 35212801-10</p>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <i class="fas fa-map-marker-alt fa-2x mb-3" style="color: var(--primary-color);"></i>
+                    <h5>Location</h5>
+                    <p>Student Services Office<br>C-II, Johar Town, Lahore</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>About UniLost & Found</h5>
+                    <p>A platform dedicated to helping university students recover their lost belongings and return found items to their rightful owners.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="index.html" class="text-white">Home</a></li>
+                        <li><a href="lost.html" class="text-white">Lost Items</a></li>
+                        <li><a href="found.html" class="text-white">Found Items</a></li>
+                        <li><a href="about.html" class="text-white">About</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-envelope me-2"></i>lostandfound@umt.edu.pk</li>
+                        <li><i class="fas fa-phone me-2"></i>+92 (42) 35212801-10</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i>C-II, Johar Town, Lahore</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p class="mb-0">© 2025 University Lost & Found System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Type Modal -->
+    <div class="modal fade" id="loginTypeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sign In As</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <button class="btn btn-primary w-100 py-3" onclick="openStudentLogin()">
+                                <i class="fas fa-user-graduate fa-2x mb-2"></i><br>
+                                <h4>Student</h4>
+                                <p class="mb-0">Sign in with university credentials</p>
+                            </button>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <button class="btn btn-secondary w-100 py-3" onclick="openAdminLogin()">
+                                <i class="fas fa-user-shield fa-2x mb-2"></i><br>
+                                <h4>Administrator</h4>
+                                <p class="mb-0">Sign in with admin credentials</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <p>Don't have an account? <a href="#" onclick="openSignup()">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Student Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="studentLoginForm">
+                        <div class="mb-3">
+                            <label for="loginEmail" class="form-label">University Email</label>
+                            <input type="email" class="form-control" id="loginEmail" placeholder="name@umt.edu.pk" required>
+                            <small class="text-danger" id="loginEmailError"></small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="loginPassword" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('loginPassword', 'loginPasswordToggle')">
+                                    <i class="fas fa-eye" id="loginPasswordToggle"></i>
+                                </button>
+                            </div>
+                            <small class="text-danger" id="loginPasswordError"></small>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">Remember me</label>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100" onclick="handleStudentLogin()">Login</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal" data-bs-dismiss="modal">Forgot password?</a>
+                    </div>
+                    <hr>
+                    <p class="text-center">Don't have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#signupModal" data-bs-dismiss="modal">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="modal fade" id="adminLoginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Admin Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="adminLoginForm" onsubmit="return validateAdminLogin(event)">
+                        <div class="mb-3">
+                            <label for="adminEmail" class="form-label">Admin Email</label>
+                            <input type="email" class="form-control" id="adminEmail" placeholder="admin@umt.edu.pk">
+                            <small class="text-danger" id="adminEmailError"></small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adminPassword" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="adminPassword">
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('adminPassword', 'adminPasswordToggle')">
+                                    <i class="fas fa-eye" id="adminPasswordToggle"></i>
+                                </button>
+                            </div>
+                            <small class="text-danger" id="adminPasswordError"></small>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="adminRememberMe">
+                            <label class="form-check-label" for="adminRememberMe">Remember me</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login as Admin</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal fade" id="signupModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Your Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="signupForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="signupFirstName" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="signupFirstName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="signupLastName" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="signupLastName" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signupEmail" class="form-label">University Email</label>
+                            <input type="email" class="form-control" id="signupEmail" placeholder="name@umt.edu.pk" required>
+                            <small class="text-danger" id="signupEmailError"></small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signupPassword" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="signupPassword" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('signupPassword', 'signupPasswordToggle')">
+                                    <i class="fas fa-eye" id="signupPasswordToggle"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength mt-2">
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar" id="passwordStrength" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="text-muted" id="passwordStrengthText">Password strength: None</small>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signupConfirmPassword" class="form-label">Confirm Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="signupConfirmPassword" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('signupConfirmPassword', 'confirmPasswordToggle')">
+                                    <i class="fas fa-eye" id="confirmPasswordToggle"></i>
+                                </button>
+                            </div>
+                            <small class="text-danger" id="passwordMatchError"></small>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                            <label class="form-check-label" for="agreeTerms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100" onclick="handleSignup()">Create Account</button>
+                    </form>
+                    <hr>
+                    <p class="text-center">Already have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reset Your Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="forgotEmail" class="form-label">University Email</label>
+                            <input type="email" class="form-control" id="forgotEmail" placeholder="name@umt.edu.pk">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Send Reset Link</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">Back to login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <script>
+        // Initialize registeredUsers array from localStorage
+        let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+
+        // Handle logout function
+        function handleLogout() {
+            localStorage.removeItem('currentUser');
+            
+            Swal.fire({
+                title: 'Logged Out Successfully',
+                text: 'You have been logged out of your account',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Update UI for logged in user
+        function updateUIForLoggedInUser(user) {
+            document.getElementById('loggedOutNav').style.display = 'none';
+            document.getElementById('loggedInNav').style.display = 'block';
+            document.getElementById('userFullName').textContent = `${user.firstName} ${user.lastName}`;
+        }
+
+        // Handle signup function
+        function handleSignup() {
+            const firstName = document.getElementById('signupFirstName').value;
+            const lastName = document.getElementById('signupLastName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+            const agreeTerms = document.getElementById('agreeTerms').checked;
+            
+            // Reset error messages
+            document.getElementById('signupEmailError').textContent = '';
+            document.getElementById('passwordMatchError').textContent = '';
+
+            // Validate email domain
+            if (!validateUMTEmail(email)) {
+                document.getElementById('signupEmailError').textContent = 'Please use your UMT email address (@umt.edu.pk)';
+                return;
+            }
+
+            // Check if email already exists
+            if (registeredUsers.some(user => user.email === email)) {
+                document.getElementById('signupEmailError').textContent = 'This email is already registered';
+                return;
+            }
+
+            // Validate password match
+            if (password !== confirmPassword) {
+                document.getElementById('passwordMatchError').textContent = 'Passwords do not match';
+                return;
+            }
+
+            // Create user data
+            const userData = {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: password
+            };
+            
+            // Add to registered users array and save to localStorage
+            registeredUsers.push(userData);
+            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+
+            // Show success message
+            Swal.fire({
+                title: 'Account Created Successfully!',
+                text: 'Welcome to UMT Belongings Hub!',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('signupModal'));
+                modal.hide();
+                updateUIForLoggedInUser(userData);
+            });
+        }
+
+        // Student login handler
+        function handleStudentLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const emailError = document.getElementById('loginEmailError');
+            const passwordError = document.getElementById('loginPasswordError');
+
+            // Reset error messages
+            emailError.textContent = '';
+            passwordError.textContent = '';
+
+            // Validate email domain
+            if (!validateUMTEmail(email)) {
+                emailError.textContent = 'Please use your UMT email address (@umt.edu.pk)';
+                return;
+            }
+
+            // Check if user exists
+            const user = registeredUsers.find(u => u.email === email);
+            if (!user) {
+                emailError.textContent = 'Email not found';
+                return;
+            }
+
+            // Validate password
+            if (user.password !== password) {
+                passwordError.textContent = 'Incorrect password';
+                return;
+            }
+
+            // Store current user
+            localStorage.setItem('currentUser', JSON.stringify(user));
+
+            // Show success message
+            Swal.fire({
+                title: 'Login Successful!',
+                text: 'Welcome back to UMT Belongings Hub!',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+                loginModal.hide();
+                updateUIForLoggedInUser(user);
+            });
+        }
+
+        // Admin login validation
+        function validateAdminLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const emailError = document.getElementById('adminEmailError');
+            const passwordError = document.getElementById('adminPasswordError');
+
+            // Reset error messages
+            emailError.textContent = '';
+            passwordError.textContent = '';
+
+            if (email !== 'admin@umt.edu.pk') {
+                emailError.textContent = 'Invalid admin email';
+                return false;
+            }
+
+            if (password !== 'Admin@UMT2024') {
+                passwordError.textContent = 'Invalid admin password';
+                return false;
+            }
+
+            // Store admin session
+            const adminData = {
+                firstName: 'Admin',
+                lastName: 'User',
+                email: email,
+                isAdmin: true
+            };
+            
+            localStorage.setItem('currentUser', JSON.stringify(adminData));
+
+            // Show success message
+            Swal.fire({
+                title: 'Admin Login Successful!',
+                text: 'Welcome to Admin Dashboard!',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = 'admin.html';
+            });
+
+            return false;
+        }
+
+        // Email validation function
+        function validateUMTEmail(email) {
+            return email.toLowerCase().endsWith('@umt.edu.pk');
+        }
+
+        // Password visibility toggle
+        function togglePasswordVisibility(inputId, toggleId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(toggleId);
+            
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                toggleIcon.classList.remove("fa-eye");
+                toggleIcon.classList.add("fa-eye-slash");
+            } else {
+                passwordInput.type = "password";
+                toggleIcon.classList.remove("fa-eye-slash");
+                toggleIcon.classList.add("fa-eye");
+            }
+        }
+
+        // Check password strength
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            const progressBar = document.getElementById('passwordStrength');
+            const strengthText = document.getElementById('passwordStrengthText');
+
+            if (password.length >= 8) strength += 25;
+            if (password.match(/[A-Z]/)) strength += 25;
+            if (password.match(/[0-9]/)) strength += 25;
+            if (password.match(/[!@#$%^&*]/)) strength += 25;
+
+            progressBar.style.width = strength + '%';
+            
+            if (strength < 50) {
+                progressBar.className = 'progress-bar bg-danger';
+                strengthText.textContent = 'Password strength: Weak';
+            } else if (strength < 75) {
+                progressBar.className = 'progress-bar bg-warning';
+                strengthText.textContent = 'Password strength: Medium';
+            } else {
+                progressBar.className = 'progress-bar bg-success';
+                strengthText.textContent = 'Password strength: Strong';
+            }
+
+            return strength;
+        }
+
+        // Modal handling functions
+        function openStudentLogin() {
+            const loginTypeModal = bootstrap.Modal.getInstance(document.getElementById('loginTypeModal'));
+            loginTypeModal.hide();
+            setTimeout(() => {
+                const studentLoginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                studentLoginModal.show();
+            }, 500);
+        }
+
+        function openAdminLogin() {
+            const loginTypeModal = bootstrap.Modal.getInstance(document.getElementById('loginTypeModal'));
+            loginTypeModal.hide();
+            setTimeout(() => {
+                const adminLoginModal = new bootstrap.Modal(document.getElementById('adminLoginModal'));
+                adminLoginModal.show();
+            }, 500);
+        }
+
+        function openSignup() {
+            const loginTypeModal = bootstrap.Modal.getInstance(document.getElementById('loginTypeModal'));
+            loginTypeModal.hide();
+            setTimeout(() => {
+                const signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
+                signupModal.show();
+            }, 500);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for existing session
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                updateUIForLoggedInUser(JSON.parse(currentUser));
+            }
+
+            // Add password strength check on input
+            const signupPassword = document.getElementById('signupPassword');
+            if (signupPassword) {
+                signupPassword.addEventListener('input', function() {
+                    checkPasswordStrength(this.value);
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

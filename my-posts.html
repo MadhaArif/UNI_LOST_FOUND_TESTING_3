@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Posts - UMT Belongings Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #48A6A7;
+            --secondary-color: #9ACBD0;
+            --accent-color: #006A71;
+            --light-color: #F2EFE7;
+            --dark-color: #006A71;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #F2EFE7, #9ACBD0);
+            padding-top: 80px;
+        }
+
+        .navbar {
+            background: var(--dark-color) !important;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .post-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .badge-lost {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .badge-found {
+            background-color: #198754;
+            color: white;
+        }
+
+        .badge-pending {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .badge-resolved {
+            background-color: #0dcaf0;
+            color: white;
+        }
+
+        .filter-btn.active {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-search-location me-2"></i>UniLost & Found
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="lost.html">Lost Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="found.html">Found Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About</a>
+                    </li>
+                </ul>
+                <div class="auth-buttons" id="loggedInNav">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="userFullName">User Name</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="dashboard.html"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                            <li><a class="dropdown-item active" href="my-posts.html"><i class="fas fa-list me-2"></i>My Posts</a></li>
+                            <li><a class="dropdown-item" href="my-requests.html"><i class="fas fa-handshake me-2"></i>My Requests</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a href="#" class="dropdown-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Header Section -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>My Posts</h2>
+            <div class="btn-group">
+                <button class="btn btn-outline-primary filter-btn active" onclick="filterPosts('all')">All Posts</button>
+                <button class="btn btn-outline-primary filter-btn" onclick="filterPosts('lost')">Lost Items</button>
+                <button class="btn btn-outline-primary filter-btn" onclick="filterPosts('found')">Found Items</button>
+            </div>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Posts</h5>
+                        <h2 class="mb-0" id="totalPosts">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Lost Items</h5>
+                        <h2 class="mb-0" id="totalLost">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Found Items</h5>
+                        <h2 class="mb-0" id="totalFound">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Posts Grid -->
+        <div class="row" id="postsContainer">
+            <!-- Posts will be dynamically added here -->
+        </div>
+
+        <!-- No Posts Message -->
+        <div id="noPostsMessage" class="text-center py-5" style="display: none;">
+            <i class="fas fa-folder-open fa-3x mb-3 text-muted"></i>
+            <h4 class="text-muted">No Posts Yet</h4>
+            <p class="text-muted">Start by reporting a lost item or registering a found item.</p>
+            <div class="mt-3">
+                <a href="lost.html" class="btn btn-primary me-2">Report Lost Item</a>
+                <a href="found.html" class="btn btn-success">Report Found Item</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Post</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this post? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <script>
+        let currentPostToDelete = null;
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Update user name in navbar
+            document.getElementById('userFullName').textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+            
+            // Load and display posts
+            loadPosts();
+        });
+
+        function loadPosts() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const posts = JSON.parse(localStorage.getItem('userPosts_' + currentUser.email)) || [];
+            const postsContainer = document.getElementById('postsContainer');
+            const noPostsMessage = document.getElementById('noPostsMessage');
+
+            // Update stats
+            document.getElementById('totalPosts').textContent = posts.length;
+            document.getElementById('totalLost').textContent = posts.filter(post => post.type === 'lost').length;
+            document.getElementById('totalFound').textContent = posts.filter(post => post.type === 'found').length;
+
+            if (posts.length === 0) {
+                postsContainer.innerHTML = '';
+                noPostsMessage.style.display = 'block';
+                return;
+            }
+
+            noPostsMessage.style.display = 'none';
+            postsContainer.innerHTML = posts.map(post => `
+                <div class="col-md-6 mb-4" data-post-type="${post.type}">
+                    <div class="post-card">
+                        <img src="${post.image || 'https://via.placeholder.com/400x200?text=No+Image'}" class="post-image" alt="${post.title}">
+                        <div class="p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="mb-0">${post.title}</h5>
+                                <span class="badge ${post.type === 'lost' ? 'badge-lost' : 'badge-found'}">${post.type}</span>
+                            </div>
+                            <p class="text-muted mb-2">${post.description}</p>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>${post.location}</small>
+                                <small class="text-muted"><i class="far fa-calendar-alt me-1"></i>${new Date(post.date).toLocaleDateString()}</small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge ${getStatusBadgeClass(post.status)}">${post.status}</span>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editPost('${post.id}')">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deletePost('${post.id}')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getStatusBadgeClass(status) {
+            const classes = {
+                'pending': 'badge-pending',
+                'resolved': 'badge-resolved',
+                'active': 'badge-found'
+            };
+            return classes[status] || 'badge-pending';
+        }
+
+        function filterPosts(type) {
+            const posts = document.querySelectorAll('[data-post-type]');
+            posts.forEach(post => {
+                if (type === 'all' || post.dataset.postType === type) {
+                    post.style.display = 'block';
+                } else {
+                    post.style.display = 'none';
+                }
+            });
+
+            // Update active button state
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(button => button.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function editPost(postId) {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const posts = JSON.parse(localStorage.getItem('userPosts_' + currentUser.email)) || [];
+            const post = posts.find(p => p.id === postId);
+
+            if (!post) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Post not found',
+                    icon: 'error'
+                });
+                return;
+            }
+
+            // Redirect to edit page with post ID
+            window.location.href = `edit-post.html?id=${postId}`;
+        }
+
+        function deletePost(postId) {
+            currentPostToDelete = postId;
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            deleteModal.show();
+        }
+
+        function confirmDelete() {
+            if (!currentPostToDelete) return;
+
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            let posts = JSON.parse(localStorage.getItem('userPosts_' + currentUser.email)) || [];
+            
+            // Remove the post
+            posts = posts.filter(post => post.id !== currentPostToDelete);
+            
+            // Update localStorage
+            localStorage.setItem('userPosts_' + currentUser.email, JSON.stringify(posts));
+            
+            // Close modal
+            const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'));
+            deleteModal.hide();
+            
+            // Show success message
+            Swal.fire({
+                title: 'Deleted!',
+                text: 'Your post has been deleted successfully',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                // Reload posts
+                loadPosts();
+            });
+
+            currentPostToDelete = null;
+        }
+
+        function handleLogout() {
+            Swal.fire({
+                title: 'Logging Out',
+                text: 'You will be redirected to the home page',
+                icon: 'info',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
+            });
+        }
+    </script>
+</body>
+</html> 

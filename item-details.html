@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item Details - UMT Belongings Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #48A6A7;
+            --secondary-color: #9ACBD0;
+            --accent-color: #006A71;
+            --light-color: #F2EFE7;
+            --dark-color: #006A71;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #F2EFE7, #9ACBD0);
+        }
+
+        .navbar {
+            background: var(--dark-color) !important;
+        }
+
+        .item-details-card {
+            border: 2px solid var(--accent-color);
+            border-radius: 15px;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+            background: var(--light-color);
+            overflow: hidden;
+        }
+
+        .item-image {
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .item-info {
+            padding: 2rem;
+        }
+
+        .info-label {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            transform: scale(1.05);
+        }
+
+        .contact-section {
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            z-index: 10;
+        }
+
+        .status-lost {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .status-found {
+            background-color: #198754;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-search-location me-2"></i>UniLost & Found
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="lost.html">Lost Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="found.html">Found Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About</a>
+                    </li>
+                </ul>
+
+                <!-- Logged Out State -->
+                <div class="auth-buttons" id="loggedOutNav">
+                    <button class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#loginTypeModal">
+                        <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                    </button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#signupModal">
+                        <i class="fas fa-user-plus me-1"></i>Sign Up
+                        </button>
+                    </div>
+
+                <!-- Logged In State -->
+                <div class="auth-buttons" id="loggedInNav" style="display: none;">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="userFullName">User Name</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="dashboard.html"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                            <li><a class="dropdown-item" href="my-posts.html"><i class="fas fa-list me-2"></i>My Posts</a></li>
+                            <li><a class="dropdown-item" href="my-requests.html"><i class="fas fa-handshake me-2"></i>My Requests</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a href="#" class="dropdown-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container my-5 pt-5">
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                        <li class="breadcrumb-item"><a href="lost.html">Lost Items</a></li>
+                        <li class="breadcrumb-item active" aria-current="page" id="itemTitle">Item Details</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        
+        <div class="item-details-card">
+            <div class="row g-0">
+                <div class="col-md-6">
+                    <img id="itemImage" src="" alt="Item Image" class="w-100 item-image">
+                </div>
+                <div class="col-md-6">
+                    <div class="item-info">
+                        <span id="statusBadge" class="status-badge"></span>
+                        <h2 id="detailTitle" class="mb-4"></h2>
+                        
+                        <div class="mb-3">
+                            <p class="info-label mb-1">Category</p>
+                            <p id="itemCategory"></p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <p class="info-label mb-1">Location</p>
+                            <p id="itemLocation"></p>
+    </div>
+
+                        <div class="mb-3">
+                            <p class="info-label mb-1">Date</p>
+                            <p id="itemDate"></p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <p class="info-label mb-1">Description</p>
+                            <p id="itemDescription"></p>
+                        </div>
+                        
+                        <div class="contact-section">
+                            <h4 class="mb-3">Contact Information</h4>
+                            <p><i class="fas fa-user me-2"></i>Posted by: <span id="posterName"></span></p>
+                            <p><i class="fas fa-phone me-2"></i>Contact: <span id="contactInfo"></span></p>
+                            
+                            <button class="btn btn-primary w-100 mt-3" onclick="handleItemAction()">
+                                <i class="fas fa-hand-holding-heart me-2"></i>
+                                <span id="actionButtonText">I Found This</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication and update UI
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                document.getElementById('userFullName').textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+                document.getElementById('loggedInNav').style.display = 'block';
+                document.getElementById('loggedOutNav').style.display = 'none';
+            } else {
+                document.getElementById('loggedInNav').style.display = 'none';
+                document.getElementById('loggedOutNav').style.display = 'block';
+            }
+
+            // Load item details
+            const itemDetails = JSON.parse(localStorage.getItem('currentItemDetails'));
+            if (itemDetails) {
+                displayItemDetails(itemDetails);
+            } else {
+                window.location.href = 'lost.html';
+            }
+        });
+
+        function displayItemDetails(item) {
+            document.getElementById('itemTitle').textContent = item.title;
+            document.getElementById('detailTitle').textContent = item.title;
+            document.getElementById('itemImage').src = item.image;
+            document.getElementById('itemCategory').textContent = item.category;
+            document.getElementById('itemLocation').textContent = item.location;
+            document.getElementById('itemDate').textContent = item.date;
+            document.getElementById('itemDescription').textContent = item.description;
+            document.getElementById('posterName').textContent = item.posterName;
+            document.getElementById('contactInfo').textContent = item.contactInfo;
+
+            // Set status badge
+            const statusBadge = document.getElementById('statusBadge');
+            if (item.type === 'lost') {
+                statusBadge.textContent = 'Lost Item';
+                statusBadge.className = 'status-badge status-lost';
+                document.getElementById('actionButtonText').textContent = 'I Found This';
+            } else {
+                statusBadge.textContent = 'Found Item';
+                statusBadge.className = 'status-badge status-found';
+                document.getElementById('actionButtonText').textContent = 'This is Mine';
+            }
+        }
+
+        function handleItemAction() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                Swal.fire({
+                    title: 'Login Required',
+                    text: 'Please sign in or create an account to continue',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sign In',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'login.html';
+                    }
+                });
+                return;
+            }
+            
+            const itemDetails = JSON.parse(localStorage.getItem('currentItemDetails'));
+            Swal.fire({
+                title: 'Contact Owner',
+                text: `Would you like to contact ${itemDetails.posterName} about this item?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Contact',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Create a new request
+                    const request = {
+                        id: Date.now().toString(),
+                        itemId: itemDetails.id,
+                        itemTitle: itemDetails.title,
+                        senderId: currentUser.email,
+                        senderName: `${currentUser.firstName} ${currentUser.lastName}`,
+                        receiverName: itemDetails.posterName,
+                        message: `I ${itemDetails.type === 'lost' ? 'found' : 'lost'} this item! Let's connect to arrange a return.`,
+                        status: 'pending',
+                        date: new Date().toISOString()
+                    };
+
+                    // Save request to localStorage
+                    const userRequests = JSON.parse(localStorage.getItem(`userRequests_${currentUser.email}`)) || [];
+                    userRequests.unshift(request);
+                    localStorage.setItem(`userRequests_${currentUser.email}`, JSON.stringify(userRequests));
+
+                    Swal.fire({
+                        title: 'Request Sent!',
+                        text: 'The owner will be notified. Check your requests page for updates.',
+                        icon: 'success'
+                    }).then(() => {
+                        window.location.href = 'my-requests.html';
+                    });
+                }
+            });
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
