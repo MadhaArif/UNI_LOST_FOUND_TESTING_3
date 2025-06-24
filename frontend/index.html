@@ -2277,60 +2277,104 @@
             }
         }
 
-        function handleQuickSearch(event) {
+        async function handleQuickSearch(event) {
             event.preventDefault();
 
-            // Check if user is logged in
-            const currentUser = localStorage.getItem('currentUser');
-            if (!currentUser) {
+            // Get form values
+            const searchType = document.getElementById('searchType').value;
+            const itemCategory = document.getElementById('itemCategory').value;
+            const location = document.getElementById('location').value;
+            const date = document.getElementById('date').value;
+
+            // Validate required fields
+            if (!searchType) {
                 Swal.fire({
-                    title: 'Login Required',
-                    text: 'Please sign in or create an account to search for items',
-                    icon: 'info',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sign In',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const loginTypeModal = new bootstrap.Modal(document.getElementById('loginTypeModal'));
-                        loginTypeModal.show();
-                    }
+                    title: 'Search Type Required',
+                    text: 'Please select whether you\'re looking for lost or found items.',
+                    icon: 'warning'
                 });
                 return false;
             }
 
-            // Get form values
-            const searchType = document.getElementById('searchType').value;
-            const category = document.getElementById('itemCategory').value;
-            const location = document.getElementById('location').value;
-            const date = document.getElementById('date').value;
+            // Prepare search data
+            const searchData = {
+                searchType: searchType,
+                itemCategory: itemCategory || null,
+                location: location || null,
+                date: date || null
+            };
 
-            // Get sample data (in a real app, this would come from your backend)
-            const sampleData = getSampleData(searchType);
+            try {
+                // Show loading
+                const resultsContainer = document.getElementById('searchResults');
+                resultsContainer.innerHTML = `
+                    <div class="col-12 text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Searching...</span>
+                        </div>
+                        <p class="mt-2">Searching for items...</p>
+                    </div>
+                `;
+                document.getElementById('searchResultsSection').style.display = 'block';
 
-            // Filter results based on criteria
-            let filteredResults = sampleData.filter(item => {
-                let matches = true;
-                if (category && category !== 'All Categories') {
-                    matches = matches && item.category === category;
+                // Call backend API
+                const response = await fetch('/api/search/quick', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(searchData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // Display results from backend
+                    displaySearchResults(result.items);
+                    
+                    // Show success message
+                    Swal.fire({
+                        title: 'Search Complete',
+                        text: result.message,
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    // Show error message
+                    resultsContainer.innerHTML = `
+                        <div class="col-12 text-center">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                ${result.message || 'No items found matching your criteria'}
+                            </div>
+                        </div>
+                    `;
                 }
-                if (location && location !== 'All Locations') {
-                    matches = matches && item.location === location;
-                }
-                if (date) {
-                    matches = matches && item.date === date;
-                }
-                return matches;
-            });
 
-            // Display results
-            displaySearchResults(filteredResults);
+                // Scroll to results
+                document.getElementById('searchResultsSection').scrollIntoView({ behavior: 'smooth' });
 
-            // Show results section
-            document.getElementById('searchResultsSection').style.display = 'block';
-
-            // Scroll to results
-            document.getElementById('searchResultsSection').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                console.error('Search error:', error);
+                
+                // Show error message
+                const resultsContainer = document.getElementById('searchResults');
+                resultsContainer.innerHTML = `
+                    <div class="col-12 text-center">
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Failed to search. Please try again.
+                        </div>
+                    </div>
+                `;
+                
+                Swal.fire({
+                    title: 'Search Failed',
+                    text: 'There was an error searching for items. Please try again.',
+                    icon: 'error'
+                });
+            }
 
             return false;
         }
