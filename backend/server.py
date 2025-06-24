@@ -99,7 +99,7 @@ async def health_check():
             }
         
         # Test database connection
-        await db.admin.command('ping')
+        result = await db.lost_items.find_one()
         return {
             "status": "healthy",
             "database": "connected", 
