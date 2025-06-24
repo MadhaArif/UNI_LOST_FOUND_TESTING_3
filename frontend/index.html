@@ -2427,7 +2427,7 @@
             const resultsContainer = document.getElementById('searchResults');
             resultsContainer.innerHTML = '';
 
-            if (results.length === 0) {
+            if (!results || results.length === 0) {
                 resultsContainer.innerHTML = `
                     <div class="col-12 text-center">
                         <div class="alert alert-info">
@@ -2439,20 +2439,32 @@
             }
 
             results.forEach(item => {
+                // Handle both formats - from backend API and existing sample data
                 const itemCard = `
                     <div class="col-md-4 mb-4">
                         <div class="card h-100">
-                            <img src="${item.image}" class="card-img-top" alt="${item.title}">
+                            <img src="${item.image || 'https://via.placeholder.com/300x200?text=No+Image'}" 
+                                 class="card-img-top" alt="${item.title}" 
+                                 style="height: 200px; object-fit: cover;">
                             <div class="card-body">
                                 <h5 class="card-title">${item.title}</h5>
                                 <p class="card-text">
+                                    <i class="fas fa-tag me-2" style="color: var(--accent-color);"></i>${item.category}<br>
                                     <i class="fas fa-map-marker-alt me-2" style="color: var(--accent-color);"></i>${item.location}<br>
-                                    <i class="far fa-calendar-alt me-2" style="color: var(--accent-color);"></i>${item.date}
+                                    <i class="far fa-calendar-alt me-2" style="color: var(--accent-color);"></i>${new Date(item.date || item.createdAt).toLocaleDateString()}
                                 </p>
                                 <p class="card-text">${item.description}</p>
+                                ${item.type ? `<span class="badge bg-${item.type === 'lost' ? 'danger' : 'success'}">${item.type.toUpperCase()}</span>` : ''}
                             </div>
                             <div class="card-footer bg-transparent">
-                                <a href="#" class="btn btn-sm btn-primary" onclick='viewItemDetails(${JSON.stringify(item)})'>View Details</a>
+                                <button class="btn btn-sm btn-primary" onclick='viewItemDetails(${JSON.stringify(item).replace(/'/g, "\\'")})'> 
+                                    <i class="fas fa-eye me-1"></i>View Details
+                                </button>
+                                ${item.type === 'found' ? `
+                                <button class="btn btn-sm btn-success ms-2" onclick='claimItem("${item.id || item._id}")'>
+                                    <i class="fas fa-handshake me-1"></i>Claim
+                                </button>
+                                ` : ''}
                             </div>
                         </div>
                     </div>
