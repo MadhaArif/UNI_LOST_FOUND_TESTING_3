@@ -308,6 +308,7 @@ class UMTLostAndFoundTester:
     @run_test
     def test_visual_search(self):
         """Visual search endpoint"""
+        # Test with valid image and 'both' search type
         search_data = {
             "imageBase64": self.sample_base64_image,
             "searchType": "both"
@@ -317,9 +318,79 @@ class UMTLostAndFoundTester:
             f"{BACKEND_URL}/api/search/visual",
             json=search_data
         )
-        assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
+        assert response.status_code == 200, f"Valid image search: Expected status code 200, got {response.status_code}"
         data = response.json()
-        assert "items" in data, "Response missing items array"
+        assert "items" in data, "Valid image search: Response missing items array"
+        assert "success" in data, "Valid image search: Response missing success field"
+        assert "message" in data, "Valid image search: Response missing message field"
+        
+        # Test with 'lost' search type
+        search_data = {
+            "imageBase64": self.sample_base64_image,
+            "searchType": "lost"
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/search/visual",
+            json=search_data
+        )
+        assert response.status_code == 200, f"Lost image search: Expected status code 200, got {response.status_code}"
+        data = response.json()
+        assert "items" in data, "Lost image search: Response missing items array"
+        
+        # Test with 'found' search type
+        search_data = {
+            "imageBase64": self.sample_base64_image,
+            "searchType": "found"
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/search/visual",
+            json=search_data
+        )
+        assert response.status_code == 200, f"Found image search: Expected status code 200, got {response.status_code}"
+        data = response.json()
+        assert "items" in data, "Found image search: Response missing items array"
+        
+        # Test with invalid search type
+        search_data = {
+            "imageBase64": self.sample_base64_image,
+            "searchType": "invalid"
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/search/visual",
+            json=search_data
+        )
+        assert response.status_code == 200, f"Invalid type image search: Expected status code 200, got {response.status_code}"
+        # The API should handle invalid search type gracefully
+        
+        # Test with corrupted base64 image data
+        search_data = {
+            "imageBase64": "invalid-base64-data",
+            "searchType": "both"
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/search/visual",
+            json=search_data
+        )
+        # The API should handle invalid base64 data gracefully
+        # Either return a 400 error or a 200 with an error message
+        assert response.status_code in [200, 400, 422], f"Invalid image data: Expected status code 200, 400, or 422, got {response.status_code}"
+        
+        # Test with empty image data
+        search_data = {
+            "imageBase64": "",
+            "searchType": "both"
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/search/visual",
+            json=search_data
+        )
+        # The API should handle empty image data gracefully
+        assert response.status_code in [200, 400, 422], f"Empty image data: Expected status code 200, 400, or 422, got {response.status_code}"
     
     @run_test
     def test_search_items(self):
