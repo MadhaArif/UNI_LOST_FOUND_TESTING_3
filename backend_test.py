@@ -10,6 +10,17 @@ from datetime import datetime
 
 # Get the backend URL from environment or use default
 BACKEND_URL = "http://localhost:8001"
+# Check if we should use the URL from frontend/.env
+try:
+    with open("/app/frontend/.env", "r") as f:
+        for line in f:
+            if line.startswith("REACT_APP_BACKEND_URL="):
+                BACKEND_URL = line.strip().split("=", 1)[1]
+                break
+except Exception as e:
+    print(f"Warning: Could not read frontend/.env: {e}")
+    
+print(f"Using backend URL: {BACKEND_URL}")
 
 def run_test(func):
     """Decorator to run a test function and print results"""
