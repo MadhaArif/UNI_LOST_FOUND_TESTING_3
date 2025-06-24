@@ -3,8 +3,13 @@ import json
 import uuid
 import base64
 import asyncio
+import cv2
+import numpy as np
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
+from io import BytesIO
+from PIL import Image
+from sklearn.metrics.pairwise import cosine_similarity
 
 from fastapi import FastAPI, HTTPException, Query, Body
 from fastapi.staticfiles import StaticFiles
@@ -72,6 +77,82 @@ class FoundItemCreate(BaseModel):
     image: Optional[str] = None
     finderInfo: Dict[str, Any]
     additionalNotes: Optional[str] = None
+
+# Image Processing Utilities
+class ImageSimilarityEngine:
+    def __init__(self):
+        # Initialize ORB detector for feature extraction
+        self.orb = cv2.ORB_create(nfeatures=500)
+    
+    def base64_to_image(self, base64_string: str) -> np.ndarray:
+        """Convert base64 string to OpenCV image"""
+        try:
+            # Remove data URL prefix if present
+            if base64_string.startswith('data:image'):
+                base64_string = base64_string.split(',')[1]
+            
+            # Decode base64 to bytes
+            image_bytes = base64.b64decode(base64_string)
+            
+            # Convert to PIL Image
+            pil_image = Image.open(BytesIO(image_bytes))
+            
+            # Convert to RGB if needed
+            if pil_image.mode != 'RGB':
+                pil_image = pil_image.convert('RGB')
+            
+            # Convert to OpenCV format (BGR)
+            opencv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+            
+            return opencv_image
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid image format: {str(e)}")
+    
+    def extract_features(self, image: np.ndarray) -> Optional[np.ndarray]:
+        """Extract ORB features from image"""
+        try:
+            # Convert to grayscale
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            
+            # Resize image to standard size for consistency
+            gray = cv2.resize(gray, (300, 300))
+            
+            # Detect keypoints and compute descriptors
+            keypoints, descriptors = self.orb.detectAndCompute(gray, None)
+            
+            if descriptors is not None:
+                # If we have fewer than 10 descriptors, the image might not be suitable
+                if len(descriptors) < 10:
+                    return None
+                
+                # Flatten descriptors to create a feature vector
+                # Take mean of descriptors to create a fixed-size feature vector
+                feature_vector = np.mean(descriptors, axis=0)
+                return feature_vector
+            
+            return None
+        except Exception as e:
+            print(f"Feature extraction error: {e}")
+            return None
+    
+    def calculate_similarity(self, features1: np.ndarray, features2: np.ndarray) -> float:
+        """Calculate cosine similarity between two feature vectors"""
+        try:
+            # Reshape for sklearn
+            features1 = features1.reshape(1, -1)
+            features2 = features2.reshape(1, -1)
+            
+            # Calculate cosine similarity
+            similarity = cosine_similarity(features1, features2)[0][0]
+            
+            # Convert to percentage
+            return float(similarity * 100)
+        except Exception as e:
+            print(f"Similarity calculation error: {e}")
+            return 0.0
+
+# Initialize image similarity engine
+image_engine = ImageSimilarityEngine()
 
 # Utility functions
 def convert_objectid_to_str(obj):
@@ -183,29 +264,44 @@ async def quick_search(search_data: QuickSearchRequest):
 
 @app.post("/api/search/visual")
 async def visual_search(search_data: VisualSearchRequest):
-    """Visual search using image similarity"""
+    """Enhanced visual search using image similarity"""
     try:
         if db is None:
             raise HTTPException(status_code=500, detail="Database connection not available")
+        
+        # Convert uploaded image to OpenCV format
+        uploaded_image = image_engine.base64_to_image(search_data.imageBase64)
+        
+        # Extract features from uploaded image
+        uploaded_features = image_engine.extract_features(uploaded_image)
+        
+        if uploaded_features is None:
+            return {
+                "success": False,
+                "message": "Could not extract features from uploaded image. Please try a clearer image.",
+                "items": []
+            }
         
         # Get all items from both collections that have images
         all_items = []
         
         # Get lost items with images
-        lost_cursor = db.lost_items.find({
-            "status": "active", 
-            "image": {"$exists": True, "$ne": None, "$ne": ""}
-        })
-        lost_items = await lost_cursor.to_list(length=None)
+        if search_data.searchType in ["lost", "both"]:
+            lost_cursor = db.lost_items.find({
+                "status": "active", 
+                "image": {"$exists": True, "$ne": None, "$ne": ""}
+            })
+            lost_items = await lost_cursor.to_list(length=None)
+            all_items.extend(lost_items)
         
         # Get found items with images
-        found_cursor = db.found_items.find({
-            "status": "active", 
-            "image": {"$exists": True, "$ne": None, "$ne": ""}
-        })
-        found_items = await found_cursor.to_list(length=None)
-        
-        all_items = lost_items + found_items
+        if search_data.searchType in ["found", "both"]:
+            found_cursor = db.found_items.find({
+                "status": "active", 
+                "image": {"$exists": True, "$ne": None, "$ne": ""}
+            })
+            found_items = await found_cursor.to_list(length=None)
+            all_items.extend(found_items)
         
         if not all_items:
             return {
@@ -214,9 +310,33 @@ async def visual_search(search_data: VisualSearchRequest):
                 "items": []
             }
         
-        # For now, return a subset of items (basic similarity)
-        # In production, this would use proper image similarity algorithms
-        similar_items = all_items[:10]  # Return top 10 items
+        # Calculate similarity for each item
+        similar_items = []
+        
+        for item in all_items:
+            try:
+                # Extract features from database item image
+                item_image = image_engine.base64_to_image(item['image'])
+                item_features = image_engine.extract_features(item_image)
+                
+                if item_features is not None:
+                    # Calculate similarity
+                    similarity_score = image_engine.calculate_similarity(uploaded_features, item_features)
+                    
+                    # Only include items with significant similarity (>= 20%)
+                    if similarity_score >= 20:
+                        item['similarity_score'] = round(similarity_score, 2)
+                        similar_items.append(item)
+                        
+            except Exception as e:
+                print(f"Error processing item {item.get('id', 'unknown')}: {e}")
+                continue
+        
+        # Sort by similarity score (highest first)
+        similar_items.sort(key=lambda x: x['similarity_score'], reverse=True)
+        
+        # Limit results to top 15 matches
+        similar_items = similar_items[:15]
         
         return {
             "success": True,
