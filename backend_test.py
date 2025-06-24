@@ -270,5 +270,21 @@ class UMTBelongingsHubBackendTest(unittest.TestCase):
         print("✅ Authentication protection is working")
 
 if __name__ == "__main__":
-    # Run the tests
-    unittest.main(argv=['first-arg-is-ignored'], exit=False)
+    # Run the tests in order
+    test_suite = unittest.TestSuite()
+    test_suite.addTest(UMTBelongingsHubBackendTest('test_01_health_check'))
+    test_suite.addTest(UMTBelongingsHubBackendTest('test_02_html_page_serving'))
+    test_suite.addTest(UMTBelongingsHubBackendTest('test_03_user_registration'))
+    test_suite.addTest(UMTBelongingsHubBackendTest('test_04_user_login'))
+    test_suite.addTest(UMTBelongingsHubBackendTest('test_05_get_current_user'))
+    test_suite.addTest(UMTBelongingsHubBackendTest('test_06_create_lost_post'))
+    test_suite.addTest(UMTBelongingsHubBackendTest('test_07_create_found_post'))
+    test_suite.addTest(UMTBelongingsHubBackendTest('test_08_get_all_posts'))
+    test_suite.addTest(UMTBelongingsHubBackendTest('test_09_get_filtered_posts'))
+    test_suite.addTest(UMTBelongingsHubBackendTest('test_10_get_specific_post'))
+    test_suite.addTest(UMTBelongingsHubBackendTest('test_11_invalid_registration'))
+    test_suite.addTest(UMTBelongingsHubBackendTest('test_12_invalid_login'))
+    test_suite.addTest(UMTBelongingsHubBackendTest('test_13_unauthorized_access'))
+    
+    runner = unittest.TextTestRunner()
+    runner.run(test_suite)
