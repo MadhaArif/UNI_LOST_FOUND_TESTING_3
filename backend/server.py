@@ -277,6 +277,8 @@ async def search_items(
             "items": convert_objectid_to_str(items)
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
