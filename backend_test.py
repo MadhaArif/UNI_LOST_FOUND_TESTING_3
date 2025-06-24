@@ -286,5 +286,5 @@ if __name__ == "__main__":
     test_suite.addTest(UMTBelongingsHubBackendTest('test_12_invalid_login'))
     test_suite.addTest(UMTBelongingsHubBackendTest('test_13_unauthorized_access'))
     
-    runner = unittest.TextTestRunner()
+    runner = unittest.TextTestRunner(verbosity=2)
     runner.run(test_suite)
