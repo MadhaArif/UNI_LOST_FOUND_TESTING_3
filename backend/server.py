@@ -4,15 +4,15 @@ import uuid
 import base64
 import asyncio
 from datetime import datetime, timedelta
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
+
 from fastapi import FastAPI, HTTPException, Query, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
-from bson.errors import InvalidId
 
 # Configuration
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/umt_belongings_hub')
@@ -21,11 +21,34 @@ OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 # Initialize FastAPI app
 app = FastAPI(title="UMT Belongings Hub API", version="1.0.0")
 
+# Add CORS middleware manually to avoid issues
+@app.middleware("http")
+async def cors_handler(request, call_next):
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
+
 # MongoDB connection
-client = AsyncIOMotorClient(MONGO_URL)
-db = client.umt_belongings_hub
+try:
+    client = AsyncIOMotorClient(MONGO_URL)
+    db = client.umt_belongings_hub
+except Exception as e:
+    print(f"MongoDB connection error: {e}")
+    db = None
 
 # Pydantic models
+class QuickSearchRequest(BaseModel):
+    searchType: str = "both"  # 'lost', 'found', or 'both' 
+    itemCategory: Optional[str] = None
+    location: Optional[str] = None
+    date: Optional[str] = None
+
+class VisualSearchRequest(BaseModel):
+    imageBase64: str
+    searchType: str = "both"  # 'lost', 'found', or 'both'
+
 class LostItemCreate(BaseModel):
     title: str
     category: str
@@ -34,7 +57,7 @@ class LostItemCreate(BaseModel):
     specificLocation: Optional[str] = None
     date: str
     image: Optional[str] = None
-    ownerInfo: Dict
+    ownerInfo: Dict[str, Any]
     offerReward: Optional[bool] = False
     rewardAmount: Optional[str] = None
     additionalNotes: Optional[str] = None
@@ -47,18 +70,8 @@ class FoundItemCreate(BaseModel):
     specificLocation: Optional[str] = None
     date: str
     image: Optional[str] = None
-    finderInfo: Dict
+    finderInfo: Dict[str, Any]
     additionalNotes: Optional[str] = None
-
-class QuickSearchRequest(BaseModel):
-    searchType: str  # 'lost' or 'found'
-    itemCategory: Optional[str] = None
-    location: Optional[str] = None
-    date: Optional[str] = None
-
-class VisualSearchRequest(BaseModel):
-    imageBase64: str
-    searchType: str = "both"  # 'lost', 'found', or 'both'
 
 # Utility functions
 def convert_objectid_to_str(obj):
@@ -72,45 +85,34 @@ def convert_objectid_to_str(obj):
     else:
         return obj
 
-async def simple_image_similarity(uploaded_image_b64: str, items: List[Dict]) -> List[Dict]:
-    """Simple image similarity based on basic comparison"""
-    # For now, return all items since we're focusing on backend functionality
-    # In production, this would use proper image similarity algorithms
-    return items[:10]  # Return top 10 items
-
-async def openai_visual_search(image_base64: str, items: List[Dict]) -> List[Dict]:
-    """Use OpenAI Vision API for better image similarity"""
-    if not OPENAI_API_KEY:
-        return await simple_image_similarity(image_base64, items)
-    
-    try:
-        # OpenAI Vision API implementation would go here
-        # For now, return simple similarity
-        return await simple_image_similarity(image_base64, items)
-    except Exception:
-        return await simple_image_similarity(image_base64, items)
-
-# Health check
+# Basic endpoints first
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint"""
     try:
+        if db is None:
+            return {
+                "status": "unhealthy",
+                "database": "disconnected",
+                "error": "MongoDB connection failed",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        
         # Test database connection
-        await db.lost_items.find_one()
+        await db.admin.command('ping')
         return {
             "status": "healthy",
-            "database": "connected",
+            "database": "connected", 
             "timestamp": datetime.utcnow().isoformat()
         }
     except Exception as e:
         return {
-            "status": "unhealthy", 
+            "status": "unhealthy",
             "database": "disconnected",
             "error": str(e),
             "timestamp": datetime.utcnow().isoformat()
         }
 
-# Root API endpoint
 @app.get("/api/")
 async def root():
     """Root API endpoint"""
@@ -129,13 +131,14 @@ async def root():
         }
     }
 
-# API Routes - Main functionality
-
-# 1. Quick Search API (Home page search)
+# Search endpoints
 @app.post("/api/search/quick")
 async def quick_search(search_data: QuickSearchRequest):
     """Quick search functionality for home page"""
     try:
+        if db is None:
+            raise HTTPException(status_code=500, detail="Database connection not available")
+        
         # Build query based on search criteria
         query = {"status": "active"}
         
@@ -169,13 +172,6 @@ async def quick_search(search_data: QuickSearchRequest):
         # Combine results
         all_items = lost_items + found_items
         
-        if not all_items:
-            return {
-                "success": False,
-                "message": "No items found matching your criteria",
-                "items": []
-            }
-        
         return {
             "success": True,
             "message": f"Found {len(all_items)} matching items",
@@ -185,20 +181,28 @@ async def quick_search(search_data: QuickSearchRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
-# 2. Visual Search API (Home page image search)
 @app.post("/api/search/visual")
 async def visual_search(search_data: VisualSearchRequest):
     """Visual search using image similarity"""
     try:
-        # Get all items from both collections
+        if db is None:
+            raise HTTPException(status_code=500, detail="Database connection not available")
+        
+        # Get all items from both collections that have images
         all_items = []
         
-        # Get lost items
-        lost_cursor = db.lost_items.find({"status": "active", "image": {"$exists": True, "$ne": None}})
+        # Get lost items with images
+        lost_cursor = db.lost_items.find({
+            "status": "active", 
+            "image": {"$exists": True, "$ne": None, "$ne": ""}
+        })
         lost_items = await lost_cursor.to_list(length=None)
         
-        # Get found items  
-        found_cursor = db.found_items.find({"status": "active", "image": {"$exists": True, "$ne": None}})
+        # Get found items with images
+        found_cursor = db.found_items.find({
+            "status": "active", 
+            "image": {"$exists": True, "$ne": None, "$ne": ""}
+        })
         found_items = await found_cursor.to_list(length=None)
         
         all_items = lost_items + found_items
@@ -210,8 +214,9 @@ async def visual_search(search_data: VisualSearchRequest):
                 "items": []
             }
         
-        # Perform image similarity search
-        similar_items = await openai_visual_search(search_data.imageBase64, all_items)
+        # For now, return a subset of items (basic similarity)
+        # In production, this would use proper image similarity algorithms
+        similar_items = all_items[:10]  # Return top 10 items
         
         return {
             "success": True,
@@ -222,7 +227,6 @@ async def visual_search(search_data: VisualSearchRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Visual search failed: {str(e)}")
 
-# 3. Lost/Found Page Search API
 @app.get("/api/search/items")
 async def search_items(
     item_type: str = Query(..., description="Type: lost or found"),
@@ -233,6 +237,9 @@ async def search_items(
 ):
     """Search items on lost/found pages"""
     try:
+        if db is None:
+            raise HTTPException(status_code=500, detail="Database connection not available")
+            
         if item_type not in ["lost", "found"]:
             raise HTTPException(status_code=400, detail="item_type must be 'lost' or 'found'")
         
@@ -291,11 +298,48 @@ async def search_items(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
-# 4. Report Lost Item API
+# CRUD endpoints
+@app.get("/api/items/lost")
+async def get_lost_items(limit: int = Query(50, ge=1, le=100)):
+    """Get all lost items"""
+    try:
+        if db is None:
+            raise HTTPException(status_code=500, detail="Database connection not available")
+            
+        cursor = db.lost_items.find({"status": "active"}).sort("createdAt", -1).limit(limit)
+        items = await cursor.to_list(length=limit)
+        return {
+            "success": True,
+            "count": len(items),
+            "items": convert_objectid_to_str(items)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch lost items: {str(e)}")
+
+@app.get("/api/items/found")
+async def get_found_items(limit: int = Query(50, ge=1, le=100)):
+    """Get all found items"""
+    try:
+        if db is None:
+            raise HTTPException(status_code=500, detail="Database connection not available")
+            
+        cursor = db.found_items.find({"status": "active"}).sort("createdAt", -1).limit(limit)
+        items = await cursor.to_list(length=limit)
+        return {
+            "success": True,
+            "count": len(items),
+            "items": convert_objectid_to_str(items)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch found items: {str(e)}")
+
 @app.post("/api/items/lost")
 async def report_lost_item(item_data: LostItemCreate):
     """Report a lost item"""
     try:
+        if db is None:
+            raise HTTPException(status_code=500, detail="Database connection not available")
+            
         # Create lost item document
         lost_item = {
             "id": str(uuid.uuid4()),
@@ -329,11 +373,13 @@ async def report_lost_item(item_data: LostItemCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to report lost item: {str(e)}")
 
-# 5. Report Found Item API  
 @app.post("/api/items/found")
 async def report_found_item(item_data: FoundItemCreate):
     """Report a found item"""
     try:
+        if db is None:
+            raise HTTPException(status_code=500, detail="Database connection not available")
+            
         # Create found item document
         found_item = {
             "id": str(uuid.uuid4()),
@@ -365,88 +411,38 @@ async def report_found_item(item_data: FoundItemCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to report found item: {str(e)}")
 
-# Additional utility APIs
-
-# Get all lost items
-@app.get("/api/items/lost")
-async def get_lost_items(limit: int = Query(50, ge=1, le=100)):
-    """Get all lost items"""
-    try:
-        cursor = db.lost_items.find({"status": "active"}).sort("createdAt", -1).limit(limit)
-        items = await cursor.to_list(length=limit)
-        return {
-            "success": True,
-            "count": len(items),
-            "items": convert_objectid_to_str(items)
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch lost items: {str(e)}")
-
-# Get all found items
-@app.get("/api/items/found")
-async def get_found_items(limit: int = Query(50, ge=1, le=100)):
-    """Get all found items"""
-    try:
-        cursor = db.found_items.find({"status": "active"}).sort("createdAt", -1).limit(limit)
-        items = await cursor.to_list(length=limit)
-        return {
-            "success": True,
-            "count": len(items),
-            "items": convert_objectid_to_str(items)
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch found items: {str(e)}")
-
-# Get single item by ID
-@app.get("/api/items/{item_type}/{item_id}")
-async def get_item(item_type: str, item_id: str):
-    """Get a specific item by ID"""
-    try:
-        if item_type not in ["lost", "found"]:
-            raise HTTPException(status_code=400, detail="item_type must be 'lost' or 'found'")
-        
-        collection = db.lost_items if item_type == "lost" else db.found_items
-        
-        try:
-            object_id = ObjectId(item_id)
-            item = await collection.find_one({"_id": object_id})
-        except InvalidId:
-            # Try with string ID
-            item = await collection.find_one({"id": item_id})
-        
-        if not item:
-            raise HTTPException(status_code=404, detail="Item not found")
-        
-        return {
-            "success": True,
-            "item": convert_objectid_to_str(item)
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch item: {str(e)}")
-
-# Serve HTML pages
+# Serve static HTML files
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
-    with open("/app/frontend/index.html", "r") as f:
-        return HTMLResponse(content=f.read())
+    try:
+        with open("/app/frontend/index.html", "r") as f:
+            return HTMLResponse(content=f.read())
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Home page not found")
 
 @app.get("/lost", response_class=HTMLResponse)
 async def serve_lost():
-    with open("/app/frontend/lost.html", "r") as f:
-        return HTMLResponse(content=f.read())
+    try:
+        with open("/app/frontend/lost.html", "r") as f:
+            return HTMLResponse(content=f.read())
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Lost page not found")
 
 @app.get("/found", response_class=HTMLResponse)
 async def serve_found():
-    with open("/app/frontend/found.html", "r") as f:
-        return HTMLResponse(content=f.read())
+    try:
+        with open("/app/frontend/found.html", "r") as f:
+            return HTMLResponse(content=f.read())
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Found page not found")
 
 @app.get("/report-lost", response_class=HTMLResponse)
 async def serve_report_lost():
-    with open("/app/frontend/report-lost.html", "r") as f:
-        return HTMLResponse(content=f.read())
+    try:
+        with open("/app/frontend/report-lost.html", "r") as f:
+            return HTMLResponse(content=f.read())
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Report lost page not found")
 
 if __name__ == "__main__":
     import uvicorn
