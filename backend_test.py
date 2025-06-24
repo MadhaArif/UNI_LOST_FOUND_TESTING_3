@@ -3,6 +3,7 @@ import json
 import unittest
 import random
 import string
+import base64
 import os
 import traceback
 from datetime import datetime
@@ -24,48 +25,56 @@ def run_test(func):
             return False
     return wrapper
 
-class UMTBelongingsHubTester:
-    """Test suite for UMT Belongings Hub FastAPI backend"""
+class UMTLostAndFoundTester:
+    """Test suite for UMT Lost & Found FastAPI backend"""
     
     def __init__(self):
         """Setup for tests - generate random data for testing"""
-        # Generate random user data for testing
+        # Generate random data for testing
         random_str = ''.join(random.choices(string.ascii_lowercase, k=8))
-        self.test_user = {
-            "firstName": "Test",
-            "lastName": "User",
-            "email": f"test.user.{random_str}@university.edu",
-            "password": "SecurePassword123!"
-        }
-        self.test_login = {
-            "email": self.test_user["email"],
-            "password": self.test_user["password"]
-        }
-        self.auth_token = None
         
-        # Test post data
-        self.test_lost_post = {
+        # Test lost item data
+        self.test_lost_item = {
             "title": "Lost MacBook Pro",
-            "description": "Silver MacBook Pro 16-inch with stickers on the cover. Last seen in the University Library.",
             "category": "Electronics",
+            "description": "Silver MacBook Pro 16-inch with stickers on the cover. Last seen in the University Library.",
             "location": "University Library",
+            "specificLocation": "Second floor, study area near window",
             "date": datetime.now().strftime("%Y-%m-%d"),
-            "type": "lost",
-            "image_base64": None
+            "image": None,  # Will be populated with base64 image if needed
+            "ownerInfo": {
+                "name": "John Smith",
+                "email": f"john.smith.{random_str}@university.edu",
+                "phone": "555-123-4567"
+            },
+            "offerReward": True,
+            "rewardAmount": "50",
+            "additionalNotes": "The laptop has a distinctive UMT sticker on the cover."
         }
         
-        self.test_found_post = {
+        # Test found item data
+        self.test_found_item = {
             "title": "Found Student ID Card",
-            "description": "Found a student ID card near the Student Union Building.",
             "category": "Documents",
+            "description": "Found a student ID card for Jane Doe",
             "location": "Student Union",
+            "specificLocation": "Near the coffee shop",
             "date": datetime.now().strftime("%Y-%m-%d"),
-            "type": "found",
-            "image_base64": None
+            "image": None,  # Will be populated with base64 image if needed
+            "finderInfo": {
+                "name": "Bob Johnson",
+                "email": f"bob.johnson.{random_str}@university.edu",
+                "phone": "555-987-6543"
+            },
+            "additionalNotes": "The ID card was found on a table."
         }
         
-        # Store created post IDs for cleanup
-        self.created_post_ids = []
+        # Store created item IDs for cleanup
+        self.created_lost_item_ids = []
+        self.created_found_item_ids = []
+        
+        # Sample base64 image (1x1 pixel transparent PNG)
+        self.sample_base64_image = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
     
     @run_test
     def test_health_check(self):
@@ -76,226 +85,247 @@ class UMTBelongingsHubTester:
         assert data["status"] == "healthy", f"Expected status 'healthy', got {data['status']}"
     
     @run_test
-    def test_html_page_serving(self):
-        """HTML page serving endpoints"""
-        # Test index page
-        response = requests.get(f"{BACKEND_URL}/")
-        assert response.status_code == 200, f"Index page: Expected status code 200, got {response.status_code}"
-        assert "text/html" in response.headers.get("content-type", ""), "Index page: Expected HTML content type"
-        
-        # Test lost page
-        response = requests.get(f"{BACKEND_URL}/lost")
-        assert response.status_code == 200, f"Lost page: Expected status code 200, got {response.status_code}"
-        assert "text/html" in response.headers.get("content-type", ""), "Lost page: Expected HTML content type"
-        
-        # Test found page
-        response = requests.get(f"{BACKEND_URL}/found")
-        assert response.status_code == 200, f"Found page: Expected status code 200, got {response.status_code}"
-        assert "text/html" in response.headers.get("content-type", ""), "Found page: Expected HTML content type"
-        
-        # Test dashboard page
-        response = requests.get(f"{BACKEND_URL}/dashboard")
-        assert response.status_code == 200, f"Dashboard page: Expected status code 200, got {response.status_code}"
-        assert "text/html" in response.headers.get("content-type", ""), "Dashboard page: Expected HTML content type"
-        
-        # Test admin page
-        response = requests.get(f"{BACKEND_URL}/admin")
-        assert response.status_code == 200, f"Admin page: Expected status code 200, got {response.status_code}"
-        assert "text/html" in response.headers.get("content-type", ""), "Admin page: Expected HTML content type"
-    
-    @run_test
-    def test_user_registration(self):
-        """User registration endpoint"""
-        response = requests.post(
-            f"{BACKEND_URL}/api/auth/register",
-            json=self.test_user
-        )
+    def test_root_api(self):
+        """Root API endpoint"""
+        response = requests.get(f"{BACKEND_URL}/api/")
         assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
         data = response.json()
-        assert "token" in data, "Response missing token"
-        assert "user" in data, "Response missing user data"
-        assert data["user"]["email"] == self.test_user["email"], f"Email mismatch: {data['user']['email']} != {self.test_user['email']}"
-        
-        # Save token for subsequent tests
-        self.auth_token = data["token"]
+        assert "message" in data, "Response missing message field"
+        assert "endpoints" in data, "Response missing endpoints information"
     
     @run_test
-    def test_user_login(self):
-        """User login endpoint"""
-        response = requests.post(
-            f"{BACKEND_URL}/api/auth/login",
-            json=self.test_login
-        )
-        assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
-        data = response.json()
-        assert "token" in data, "Response missing token"
-        assert "user" in data, "Response missing user data"
-        assert data["user"]["email"] == self.test_user["email"], f"Email mismatch: {data['user']['email']} != {self.test_user['email']}"
-        
-        # Update token
-        self.auth_token = data["token"]
-    
-    @run_test
-    def test_get_current_user(self):
-        """Get current user endpoint"""
-        headers = {"Authorization": f"Bearer {self.auth_token}"}
-        response = requests.get(
-            f"{BACKEND_URL}/api/auth/me",
-            headers=headers
-        )
-        assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
-        data = response.json()
-        assert data["email"] == self.test_user["email"], f"Email mismatch: {data['email']} != {self.test_user['email']}"
-    
-    @run_test
-    def test_create_lost_post(self):
-        """Create lost post endpoint"""
-        headers = {"Authorization": f"Bearer {self.auth_token}"}
-        response = requests.post(
-            f"{BACKEND_URL}/api/posts",
-            json=self.test_lost_post,
-            headers=headers
-        )
-        assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
-        data = response.json()
-        assert data["title"] == self.test_lost_post["title"], f"Title mismatch: {data['title']} != {self.test_lost_post['title']}"
-        assert data["type"] == "lost", f"Type mismatch: {data['type']} != lost"
-        
-        # Save post ID for later tests
-        self.created_post_ids.append(data["_id"])
-    
-    @run_test
-    def test_create_found_post(self):
-        """Create found post endpoint"""
-        headers = {"Authorization": f"Bearer {self.auth_token}"}
-        response = requests.post(
-            f"{BACKEND_URL}/api/posts",
-            json=self.test_found_post,
-            headers=headers
-        )
-        assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
-        data = response.json()
-        assert data["title"] == self.test_found_post["title"], f"Title mismatch: {data['title']} != {self.test_found_post['title']}"
-        assert data["type"] == "found", f"Type mismatch: {data['type']} != found"
-        
-        # Save post ID for later tests
-        self.created_post_ids.append(data["_id"])
-    
-    @run_test
-    def test_get_all_posts(self):
-        """Get all posts endpoint"""
-        response = requests.get(f"{BACKEND_URL}/api/posts")
-        assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
-        data = response.json()
-        assert isinstance(data, list), f"Expected list response, got {type(data)}"
-        
-        # Verify our created posts are in the list
-        post_ids = [post["_id"] for post in data]
-        for post_id in self.created_post_ids:
-            assert post_id in post_ids, f"Created post {post_id} not found in response"
-    
-    @run_test
-    def test_get_filtered_posts(self):
-        """Get filtered posts endpoint"""
-        # Test filtering by type
-        response = requests.get(f"{BACKEND_URL}/api/posts?type=lost")
-        assert response.status_code == 200, f"Type filter: Expected status code 200, got {response.status_code}"
-        data = response.json()
-        assert isinstance(data, list), f"Type filter: Expected list response, got {type(data)}"
-        for post in data:
-            assert post["type"] == "lost", f"Type filter: Found post with type {post['type']}, expected 'lost'"
-        
-        # Test filtering by category
-        response = requests.get(f"{BACKEND_URL}/api/posts?category=Electronics")
-        assert response.status_code == 200, f"Category filter: Expected status code 200, got {response.status_code}"
-        data = response.json()
-        assert isinstance(data, list), f"Category filter: Expected list response, got {type(data)}"
-        
-        # Test filtering by location
-        response = requests.get(f"{BACKEND_URL}/api/posts?location=University Library")
-        assert response.status_code == 200, f"Location filter: Expected status code 200, got {response.status_code}"
-        data = response.json()
-        assert isinstance(data, list), f"Location filter: Expected list response, got {type(data)}"
-    
-    @run_test
-    def test_get_specific_post(self):
-        """Get specific post endpoint"""
-        if not self.created_post_ids:
-            print("   Skipping: No posts created to test with")
-            return
-        
-        post_id = self.created_post_ids[0]
-        response = requests.get(f"{BACKEND_URL}/api/posts/{post_id}")
-        assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
-        data = response.json()
-        assert data["_id"] == post_id, f"ID mismatch: {data['_id']} != {post_id}"
-    
-    @run_test
-    def test_invalid_registration(self):
-        """Registration validation"""
-        # Test with non-university email
-        invalid_user = self.test_user.copy()
-        invalid_user["email"] = "test@gmail.com"
+    def test_report_lost_item(self):
+        """Report lost item endpoint"""
+        # Add sample image to test data
+        test_data = self.test_lost_item.copy()
+        test_data["image"] = self.sample_base64_image
         
         response = requests.post(
-            f"{BACKEND_URL}/api/auth/register",
-            json=invalid_user
+            f"{BACKEND_URL}/api/items/lost",
+            json=test_data
         )
-        assert response.status_code == 400, f"Expected status code 400, got {response.status_code}"
+        assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
         data = response.json()
-        assert "detail" in data, "Response missing error detail"
+        assert data["success"] is True, f"Expected success to be True, got {data['success']}"
+        assert "item" in data, "Response missing item data"
+        assert data["item"]["title"] == test_data["title"], f"Title mismatch: {data['item']['title']} != {test_data['title']}"
+        
+        # Save item ID for later tests
+        self.created_lost_item_ids.append(data["item"]["id"])
     
     @run_test
-    def test_invalid_login(self):
-        """Login validation"""
-        invalid_login = {
-            "email": self.test_user["email"],
-            "password": "WrongPassword123"
+    def test_report_found_item(self):
+        """Report found item endpoint"""
+        # Add sample image to test data
+        test_data = self.test_found_item.copy()
+        test_data["image"] = self.sample_base64_image
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/items/found",
+            json=test_data
+        )
+        assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
+        data = response.json()
+        assert data["success"] is True, f"Expected success to be True, got {data['success']}"
+        assert "item" in data, "Response missing item data"
+        assert data["item"]["title"] == test_data["title"], f"Title mismatch: {data['item']['title']} != {test_data['title']}"
+        
+        # Save item ID for later tests
+        self.created_found_item_ids.append(data["item"]["id"])
+    
+    @run_test
+    def test_get_lost_items(self):
+        """Get all lost items endpoint"""
+        response = requests.get(f"{BACKEND_URL}/api/items/lost")
+        assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
+        data = response.json()
+        assert data["success"] is True, f"Expected success to be True, got {data['success']}"
+        assert "items" in data, "Response missing items array"
+        assert isinstance(data["items"], list), f"Expected items to be a list, got {type(data['items'])}"
+        
+        # Verify our created item is in the list
+        if self.created_lost_item_ids:
+            item_ids = [item["id"] for item in data["items"]]
+            assert any(item_id in item_ids for item_id in self.created_lost_item_ids), "Created lost item not found in response"
+    
+    @run_test
+    def test_get_found_items(self):
+        """Get all found items endpoint"""
+        response = requests.get(f"{BACKEND_URL}/api/items/found")
+        assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
+        data = response.json()
+        assert data["success"] is True, f"Expected success to be True, got {data['success']}"
+        assert "items" in data, "Response missing items array"
+        assert isinstance(data["items"], list), f"Expected items to be a list, got {type(data['items'])}"
+        
+        # Verify our created item is in the list
+        if self.created_found_item_ids:
+            item_ids = [item["id"] for item in data["items"]]
+            assert any(item_id in item_ids for item_id in self.created_found_item_ids), "Created found item not found in response"
+    
+    @run_test
+    def test_get_specific_item(self):
+        """Get specific item endpoint"""
+        # Test getting a lost item
+        if self.created_lost_item_ids:
+            item_id = self.created_lost_item_ids[0]
+            response = requests.get(f"{BACKEND_URL}/api/items/lost/{item_id}")
+            assert response.status_code == 200, f"Lost item: Expected status code 200, got {response.status_code}"
+            data = response.json()
+            assert data["success"] is True, f"Lost item: Expected success to be True, got {data['success']}"
+            assert data["item"]["id"] == item_id, f"Lost item: ID mismatch: {data['item']['id']} != {item_id}"
+        
+        # Test getting a found item
+        if self.created_found_item_ids:
+            item_id = self.created_found_item_ids[0]
+            response = requests.get(f"{BACKEND_URL}/api/items/found/{item_id}")
+            assert response.status_code == 200, f"Found item: Expected status code 200, got {response.status_code}"
+            data = response.json()
+            assert data["success"] is True, f"Found item: Expected success to be True, got {data['success']}"
+            assert data["item"]["id"] == item_id, f"Found item: ID mismatch: {data['item']['id']} != {item_id}"
+    
+    @run_test
+    def test_quick_search(self):
+        """Quick search endpoint"""
+        # Test searching for lost items
+        search_data = {
+            "searchType": "lost",
+            "itemCategory": "Electronics",
+            "location": "Library",
+            "date": None
         }
         
         response = requests.post(
-            f"{BACKEND_URL}/api/auth/login",
-            json=invalid_login
+            f"{BACKEND_URL}/api/search/quick",
+            json=search_data
         )
-        assert response.status_code == 400, f"Expected status code 400, got {response.status_code}"
+        assert response.status_code == 200, f"Lost search: Expected status code 200, got {response.status_code}"
         data = response.json()
-        assert "detail" in data, "Response missing error detail"
+        assert "items" in data, "Lost search: Response missing items array"
+        
+        # Test searching for found items
+        search_data = {
+            "searchType": "found",
+            "itemCategory": "Documents",
+            "location": "Student Union",
+            "date": None
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/search/quick",
+            json=search_data
+        )
+        assert response.status_code == 200, f"Found search: Expected status code 200, got {response.status_code}"
+        data = response.json()
+        assert "items" in data, "Found search: Response missing items array"
+        
+        # Test searching for both types
+        search_data = {
+            "searchType": "both",
+            "itemCategory": None,
+            "location": None,
+            "date": None
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/search/quick",
+            json=search_data
+        )
+        assert response.status_code == 200, f"Both search: Expected status code 200, got {response.status_code}"
+        data = response.json()
+        assert "items" in data, "Both search: Response missing items array"
     
     @run_test
-    def test_unauthorized_access(self):
-        """Authentication protection"""
-        # Try to create a post without authentication
-        response = requests.post(
-            f"{BACKEND_URL}/api/posts",
-            json=self.test_lost_post
-        )
-        assert response.status_code != 200, f"Expected non-200 status code, got {response.status_code}"
+    def test_visual_search(self):
+        """Visual search endpoint"""
+        search_data = {
+            "imageBase64": self.sample_base64_image,
+            "searchType": "both"
+        }
         
-        # Try to access user info without authentication
-        response = requests.get(f"{BACKEND_URL}/api/auth/me")
-        assert response.status_code != 200, f"Expected non-200 status code, got {response.status_code}"
+        response = requests.post(
+            f"{BACKEND_URL}/api/search/visual",
+            json=search_data
+        )
+        assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
+        data = response.json()
+        assert "items" in data, "Response missing items array"
+    
+    @run_test
+    def test_search_items(self):
+        """Search items with filters endpoint"""
+        # Test searching lost items
+        response = requests.get(f"{BACKEND_URL}/api/search/items?item_type=lost&q=MacBook&category=Electronics&location=Library")
+        assert response.status_code == 200, f"Lost search: Expected status code 200, got {response.status_code}"
+        data = response.json()
+        assert data["success"] is True, f"Lost search: Expected success to be True, got {data['success']}"
+        assert "items" in data, "Lost search: Response missing items array"
+        
+        # Test searching found items
+        response = requests.get(f"{BACKEND_URL}/api/search/items?item_type=found&q=ID&category=Documents")
+        assert response.status_code == 200, f"Found search: Expected status code 200, got {response.status_code}"
+        data = response.json()
+        assert data["success"] is True, f"Found search: Expected success to be True, got {data['success']}"
+        assert "items" in data, "Found search: Response missing items array"
+        
+        # Test with invalid item type
+        response = requests.get(f"{BACKEND_URL}/api/search/items?item_type=invalid")
+        assert response.status_code == 400, f"Invalid type: Expected status code 400, got {response.status_code}"
+    
+    @run_test
+    def test_data_validation(self):
+        """Data validation for item submission"""
+        # Test missing required field for lost item
+        invalid_lost_item = self.test_lost_item.copy()
+        del invalid_lost_item["title"]
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/items/lost",
+            json=invalid_lost_item
+        )
+        assert response.status_code == 422, f"Missing field: Expected status code 422, got {response.status_code}"
+        
+        # Test missing required field for found item
+        invalid_found_item = self.test_found_item.copy()
+        del invalid_found_item["location"]
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/items/found",
+            json=invalid_found_item
+        )
+        assert response.status_code == 422, f"Missing field: Expected status code 422, got {response.status_code}"
+    
+    @run_test
+    def test_error_handling(self):
+        """Error handling for invalid requests"""
+        # Test invalid item ID
+        response = requests.get(f"{BACKEND_URL}/api/items/lost/invalid-id")
+        assert response.status_code in [404, 400], f"Invalid ID: Expected status code 404 or 400, got {response.status_code}"
+        
+        # Test invalid search parameters
+        response = requests.get(f"{BACKEND_URL}/api/search/items?item_type=invalid")
+        assert response.status_code == 400, f"Invalid search: Expected status code 400, got {response.status_code}"
 
 def run_all_tests():
     """Run all tests in sequence"""
-    print("\n🔍 TESTING UMT BELONGINGS HUB BACKEND API 🔍\n")
+    print("\n🔍 TESTING UMT LOST & FOUND BACKEND API 🔍\n")
     
-    tester = UMTBelongingsHubTester()
+    tester = UMTLostAndFoundTester()
     
     # Run tests in sequence
     tests = [
         tester.test_health_check,
-        tester.test_html_page_serving,
-        tester.test_user_registration,
-        tester.test_user_login,
-        tester.test_get_current_user,
-        tester.test_create_lost_post,
-        tester.test_create_found_post,
-        tester.test_get_all_posts,
-        tester.test_get_filtered_posts,
-        tester.test_get_specific_post,
-        tester.test_invalid_registration,
-        tester.test_invalid_login,
-        tester.test_unauthorized_access
+        tester.test_root_api,
+        tester.test_report_lost_item,
+        tester.test_report_found_item,
+        tester.test_get_lost_items,
+        tester.test_get_found_items,
+        tester.test_get_specific_item,
+        tester.test_quick_search,
+        tester.test_visual_search,
+        tester.test_search_items,
+        tester.test_data_validation,
+        tester.test_error_handling
     ]
     
     results = []
