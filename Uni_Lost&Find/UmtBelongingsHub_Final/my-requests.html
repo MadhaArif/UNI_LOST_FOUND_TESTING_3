@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Requests - UMT Belongings Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #48A6A7;
+            --secondary-color: #9ACBD0;
+            --accent-color: #006A71;
+            --light-color: #F2EFE7;
+            --dark-color: #006A71;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #F2EFE7, #9ACBD0);
+            padding-top: 80px;
+        }
+
+        .navbar {
+            background: var(--dark-color) !important;
+        }
+
+        .request-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .request-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .badge-pending {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .badge-accepted {
+            background-color: #198754;
+            color: white;
+        }
+
+        .badge-rejected {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .badge-completed {
+            background-color: #0dcaf0;
+            color: white;
+        }
+
+        .filter-btn.active {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+        }
+
+        .chat-bubble {
+            background: var(--light-color);
+            border-radius: 15px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            max-width: 80%;
+        }
+
+        .chat-bubble.sent {
+            background: var(--primary-color);
+            color: white;
+            margin-left: auto;
+        }
+
+        .chat-bubble.received {
+            background: var(--secondary-color);
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-search-location me-2"></i>UniLost & Found
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="lost.html">Lost Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="found.html">Found Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About</a>
+                    </li>
+                </ul>
+                <div class="auth-buttons" id="loggedInNav">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="userFullName">User Name</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="dashboard.html"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                            <li><a class="dropdown-item" href="my-posts.html"><i class="fas fa-list me-2"></i>My Posts</a></li>
+                            <li><a class="dropdown-item active" href="my-requests.html"><i class="fas fa-handshake me-2"></i>My Requests</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a href="#" class="dropdown-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Header Section -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>My Requests</h2>
+            <div class="btn-group">
+                <button class="btn btn-outline-primary filter-btn active" onclick="filterRequests('all')">All Requests</button>
+                <button class="btn btn-outline-primary filter-btn" onclick="filterRequests('sent')">Sent</button>
+                <button class="btn btn-outline-primary filter-btn" onclick="filterRequests('received')">Received</button>
+            </div>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Requests</h5>
+                        <h2 class="mb-0" id="totalRequests">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">Pending</h5>
+                        <h2 class="mb-0" id="pendingRequests">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Accepted</h5>
+                        <h2 class="mb-0" id="acceptedRequests">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Completed</h5>
+                        <h2 class="mb-0" id="completedRequests">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requests List -->
+        <div id="requestsContainer">
+            <!-- Requests will be dynamically added here -->
+        </div>
+
+        <!-- No Requests Message -->
+        <div id="noRequestsMessage" class="text-center py-5" style="display: none;">
+            <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
+            <h4 class="text-muted">No Requests Yet</h4>
+            <p class="text-muted">Browse lost and found items to make requests.</p>
+            <div class="mt-3">
+                <a href="lost.html" class="btn btn-primary me-2">View Lost Items</a>
+                <a href="found.html" class="btn btn-success">View Found Items</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div class="modal fade" id="chatModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chat with <span id="chatUserName">User</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="chatMessages" style="height: 300px; overflow-y: auto;">
+                        <!-- Messages will be dynamically added here -->
+                    </div>
+                    <div class="mt-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="messageInput" placeholder="Type your message...">
+                            <button class="btn btn-primary" onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <script>
+        let currentChatRequestId = null;
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Update user name in navbar
+            document.getElementById('userFullName').textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+            
+            // Load and display requests
+            loadRequests();
+        });
+
+        function loadRequests() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const requests = JSON.parse(localStorage.getItem('userRequests_' + currentUser.email)) || [];
+            const requestsContainer = document.getElementById('requestsContainer');
+            const noRequestsMessage = document.getElementById('noRequestsMessage');
+
+            // Update stats
+            const stats = calculateRequestStats(requests);
+            document.getElementById('totalRequests').textContent = requests.length;
+            document.getElementById('pendingRequests').textContent = stats.pending;
+            document.getElementById('acceptedRequests').textContent = stats.accepted;
+            document.getElementById('completedRequests').textContent = stats.completed;
+
+            if (requests.length === 0) {
+                requestsContainer.innerHTML = '';
+                noRequestsMessage.style.display = 'block';
+                return;
+            }
+
+            noRequestsMessage.style.display = 'none';
+            requestsContainer.innerHTML = requests.map(request => `
+                <div class="request-card p-3 mb-3" data-request-type="${request.type}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="mb-1">${request.itemTitle}</h5>
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-user me-1"></i>
+                                ${request.type === 'sent' ? 'To: ' + request.receiverName : 'From: ' + request.senderName}
+                            </p>
+                        </div>
+                        <span class="badge ${getStatusBadgeClass(request.status)}">${request.status}</span>
+                    </div>
+                    <p class="mb-2">${request.message}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="far fa-calendar-alt me-1"></i>${new Date(request.date).toLocaleDateString()}
+                        </small>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-primary" onclick="openChat('${request.id}')">
+                                <i class="fas fa-comments"></i> Chat
+                            </button>
+                            ${request.status === 'pending' && request.type === 'received' ? `
+                                <button class="btn btn-sm btn-outline-success" onclick="handleRequest('${request.id}', 'accept')">
+                                    <i class="fas fa-check"></i> Accept
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="handleRequest('${request.id}', 'reject')">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            ` : ''}
+                            ${request.status === 'accepted' ? `
+                                <button class="btn btn-sm btn-outline-info" onclick="handleRequest('${request.id}', 'complete')">
+                                    <i class="fas fa-check-double"></i> Mark Complete
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function calculateRequestStats(requests) {
+            return {
+                pending: requests.filter(r => r.status === 'pending').length,
+                accepted: requests.filter(r => r.status === 'accepted').length,
+                completed: requests.filter(r => r.status === 'completed').length
+            };
+        }
+
+        function getStatusBadgeClass(status) {
+            const classes = {
+                'pending': 'badge-pending',
+                'accepted': 'badge-accepted',
+                'rejected': 'badge-rejected',
+                'completed': 'badge-completed'
+            };
+            return classes[status] || 'badge-pending';
+        }
+
+        function filterRequests(type) {
+            const requests = document.querySelectorAll('[data-request-type]');
+            requests.forEach(request => {
+                if (type === 'all' || request.dataset.requestType === type) {
+                    request.style.display = 'block';
+                } else {
+                    request.style.display = 'none';
+                }
+            });
+
+            // Update active button state
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(button => button.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function openChat(requestId) {
+            currentChatRequestId = requestId;
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const requests = JSON.parse(localStorage.getItem('userRequests_' + currentUser.email)) || [];
+            const request = requests.find(r => r.id === requestId);
+
+            if (!request) return;
+
+            // Set chat user name
+            document.getElementById('chatUserName').textContent = 
+                request.type === 'sent' ? request.receiverName : request.senderName;
+
+            // Load chat messages
+            loadChatMessages(requestId);
+
+            // Show modal
+            const chatModal = new bootstrap.Modal(document.getElementById('chatModal'));
+            chatModal.show();
+        }
+
+        function loadChatMessages(requestId) {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const messages = JSON.parse(localStorage.getItem('chatMessages_' + requestId)) || [];
+            const chatMessages = document.getElementById('chatMessages');
+
+            chatMessages.innerHTML = messages.map(message => `
+                <div class="chat-bubble ${message.senderId === currentUser.email ? 'sent' : 'received'}">
+                    <small class="d-block text-muted">${message.senderName}</small>
+                    ${message.text}
+                    <small class="d-block text-end">${new Date(message.timestamp).toLocaleTimeString()}</small>
+                </div>
+            `).join('');
+
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMessage() {
+            if (!currentChatRequestId) return;
+
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const messages = JSON.parse(localStorage.getItem('chatMessages_' + currentChatRequestId)) || [];
+
+            // Add new message
+            messages.push({
+                senderId: currentUser.email,
+                senderName: `${currentUser.firstName} ${currentUser.lastName}`,
+                text: message,
+                timestamp: new Date().toISOString()
+            });
+
+            // Save messages
+            localStorage.setItem('chatMessages_' + currentChatRequestId, JSON.stringify(messages));
+
+            // Clear input and reload messages
+            messageInput.value = '';
+            loadChatMessages(currentChatRequestId);
+        }
+
+        function handleRequest(requestId, action) {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            let requests = JSON.parse(localStorage.getItem('userRequests_' + currentUser.email)) || [];
+            const request = requests.find(r => r.id === requestId);
+
+            if (!request) return;
+
+            switch (action) {
+                case 'accept':
+                    request.status = 'accepted';
+                    break;
+                case 'reject':
+                    request.status = 'rejected';
+                    break;
+                case 'complete':
+                    request.status = 'completed';
+                    break;
+            }
+
+            // Update requests
+            requests = requests.map(r => r.id === requestId ? request : r);
+            localStorage.setItem('userRequests_' + currentUser.email, JSON.stringify(requests));
+
+            // Show success message
+            Swal.fire({
+                title: 'Success!',
+                text: `Request ${action}ed successfully`,
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                loadRequests();
+            });
+        }
+
+        function handleLogout() {
+            Swal.fire({
+                title: 'Logging Out',
+                text: 'You will be redirected to the home page',
+                icon: 'info',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Add sample data for demonstration
+        function addSampleData() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            const requests = [
+                {
+                    id: '1',
+                    type: 'sent',
+                    itemTitle: 'Lost Wallet',
+                    receiverName: 'Sarah Khan',
+                    message: 'Hi, I think I found your wallet in the library.',
+                    status: 'pending',
+                    date: new Date(Date.now() - 86400000).toISOString()
+                },
+                {
+                    id: '2',
+                    type: 'received',
+                    itemTitle: 'Found Keys',
+                    senderName: 'Ali Ahmed',
+                    message: 'Hello, are these your keys? I found them near the cafeteria.',
+                    status: 'accepted',
+                    date: new Date(Date.now() - 172800000).toISOString()
+                }
+            ];
+
+            localStorage.setItem('userRequests_' + currentUser.email, JSON.stringify(requests));
+            loadRequests();
+        }
+
+        // Add sample data if none exists
+        if (!localStorage.getItem('userRequests_' + JSON.parse(localStorage.getItem('currentUser')).email)) {
+            addSampleData();
+        }
+    </script>
+</body>
+</html> 

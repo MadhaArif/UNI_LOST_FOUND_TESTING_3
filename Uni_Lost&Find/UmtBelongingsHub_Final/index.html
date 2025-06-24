@@ -1,0 +1,2988 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umt Belongings Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <!-- Add TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
+    <!-- Add our image similarity script -->
+    <script src="js/imageSimilarity.js"></script>
+    <style>
+        :root {
+            --primary-color: #48A6A7;
+            /* Teal */
+            --secondary-color: #9ACBD0;
+            /* Light teal */
+            --accent-color: #006A71;
+            /* Dark teal */
+            --light-color: #F2EFE7;
+            /* Light beige */
+            --dark-color: #006A71;
+            /* Dark teal */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #F2EFE7, #9ACBD0);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color);
+            text-shadow: 1px 1px var(--dark-color);
+        }
+
+        .navbar {
+            background: var(--dark-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-section {
+
+            color: var(--light-color);
+            padding: 5rem 0;
+            margin-bottom: 2rem;
+            position: relative;
+            border-radius: 20px;
+            animation: slideUp 1s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .hero-section h1 {
+            font-size: 3.5rem;
+            text-shadow: 3px 3px var(--dark-color);
+            /* Removed bounce animation */
+        }
+
+        .card {
+            border: 2px solid var(--accent-color);
+            border-radius: 15px;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+            background: var(--light-color);
+            transition: all 0.4s ease;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            animation: pulse 2s infinite;
+            color: #fff;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            transform: scale(1.1);
+        }
+
+        .btn-danger {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            text-shadow: 2px 2px var(--dark-color);
+            animation: spin 2s infinite linear;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .notification-badge {
+            background: var(--primary-color);
+            border-radius: 50%;
+            padding: 5px 10px;
+            animation: bounceIn 1s ease-out;
+            color: #fff;
+        }
+
+        @keyframes bounceIn {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 3rem 0;
+            }
+
+            .hero-section h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        .custom-alert-modal .modal-content {
+            border-radius: 15px;
+            border: 2px solid var(--accent-color);
+            background: var(--light-color);
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+            animation: popIn 0.5s ease-out;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .custom-alert-modal .modal-header {
+            background: var(--dark-color);
+            color: var(--light-color);
+            border-bottom: none;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .custom-alert-modal .modal-body {
+            background: var(--light-color);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .custom-alert-modal .modal-body i {
+            color: var(--primary-color);
+            font-size: 3rem;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            50% {
+                transform: translateX(10px);
+            }
+
+            75% {
+                transform: translateX(-10px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        .custom-alert-modal .modal-body p {
+            font-size: 1.2rem;
+            color: var(--dark-color);
+        }
+
+        .custom-alert-modal .btn-primary {
+            background: var(--secondary-color);
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: #fff;
+        }
+
+        .custom-alert-modal .btn-primary:hover {
+            background: var(--primary-color);
+        }
+
+        .card-img-top {
+            border-radius: 10px 10px 0 0;
+            animation: float 3s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .col-md-4 {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.5s ease;
+        }
+
+        .col-md-4.in-view {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .display-4 {
+            color: var(--primary-color);
+            text-shadow: 2px 2px var(--dark-color);
+            animation: zoomIn 1s ease-out;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        /* Quick Search Form Fixes */
+        .form-select,
+        .form-control {
+            background: var(--light-color) !important;
+            border: 2px solid var(--accent-color) !important;
+            color: var(--dark-color) !important;
+            border-radius: 10px !important;
+        }
+
+        .card-title,
+        .form-label {
+            color: var(--dark-color) !important;
+            text-shadow: none;
+        }
+
+        .mb-5 {
+            padding: 2rem 0;
+            margin-bottom: 2rem !important;
+        }
+
+        /* Footer Adjustments */
+        footer {
+            background: var(--dark-color) !important;
+        }
+
+        footer h5,
+        footer p,
+        footer a {
+            color: var(--light-color) !important;
+        }
+
+        footer i {
+            color: var(--secondary-color) !important;
+        }
+
+        footer hr {
+            border-color: var(--secondary-color) !important;
+        }
+
+        /* Navbar Adjustments */
+        .navbar-dark .navbar-nav .nav-link {
+            color: var(--light-color);
+        }
+
+        .navbar-dark .navbar-nav .nav-link:hover {
+            color: var(--secondary-color);
+        }
+
+        .btn-outline-light {
+            color: var(--light-color);
+            border-color: var(--light-color);
+        }
+
+        .btn-outline-light:hover {
+            background: var(--secondary-color);
+            color: var(--dark-color);
+        }
+
+        /* CSS FOR QR CODE */
+        .qr-container {
+            padding: 1rem;
+            background: var(--light-color);
+            border-radius: 10px;
+            border: 2px solid var(--accent-color);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .qr-container img {
+            max-width: 300px;
+            border: 3px solid var(--accent-color);
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .qr-container img:hover {
+            transform: scale(1.05);
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        @media print {
+            .qr-container {
+                background: none;
+                border: none;
+                padding: 0;
+            }
+
+            .qr-container img {
+                border: none;
+                max-width: 100%;
+            }
+
+            #qrDownloadLink,
+            #generateQrBtn {
+                display: none;
+            }
+        }
+
+        /* Chatbot Styles */
+/* Chatbot Styles */
+/* Chatbot Styles */
+.chatbot-toggle-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    padding: 5px;
+}
+
+.chatbot-toggle-btn:hover {
+    background: var(--accent-color);
+    transform: scale(1.1);
+}
+
+.chatbot-toggle-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    transition: transform 0.3s ease;
+}
+
+.chatbot-toggle-btn:hover .chatbot-toggle-icon {
+    transform: rotate(10deg);
+}
+
+.chatbot-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 350px;
+    height: 500px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    display: none;
+    flex-direction: column;
+    z-index: 1001;
+    overflow: hidden;
+    border: 2px solid var(--accent-color);
+    transform-origin: bottom right;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.chatbot-header {
+    background: var(--dark-color);
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chatbot-title {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+}
+
+.chatbot-custom-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+}
+.chatbot-header .chatbot-custom-icon {
+    filter: none; /* Remove the white filter */
+}
+.chatbot-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    transition: transform 0.2s ease;
+}
+
+.chatbot-close-btn:hover {
+    transform: rotate(90deg);
+}
+
+.chatbot-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: var(--light-color);
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) transparent;
+}
+
+.chatbot-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 3px;
+}
+
+.chatbot-welcome {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.chatbot-welcome i {
+    color: var(--primary-color);
+    margin-right: 8px;
+}
+
+.chat-message {
+    margin-bottom: 15px;
+    padding: 12px 15px;
+    border-radius: 18px;
+    max-width: 80%;
+    word-wrap: break-word;
+    animation: messageAppear 0.3s ease-out;
+    line-height: 1.4;
+}
+
+@keyframes messageAppear {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.user-message {
+    background: var(--secondary-color);
+    color: var(--dark-color);
+    margin-left: auto;
+    border-bottom-right-radius: 5px;
+}
+
+.bot-message {
+    background: white;
+    border: 1px solid #ddd;
+    margin-right: auto;
+    border-bottom-left-radius: 5px;
+}
+
+.quick-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.quick-question-btn {
+    background: var(--light-color);
+    border: 1px solid var(--accent-color);
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.quick-question-btn i {
+    color: var(--accent-color);
+    font-size: 16px;
+    transition: transform 0.2s ease;
+}
+
+.quick-question-btn:hover {
+    background: var(--secondary-color);
+    transform: translateX(5px);
+}
+
+.quick-question-btn:hover i {
+    transform: scale(1.1);
+}
+
+.chatbot-input {
+    display: flex;
+    padding: 15px;
+    background: white;
+    border-top: 1px solid #eee;
+}
+
+.chatbot-input input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.chatbot-input input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(72, 166, 167, 0.2);
+}
+
+.chatbot-send-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    margin-left: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.chatbot-send-btn:hover {
+    background: var(--accent-color);
+    transform: rotate(15deg) scale(1.1);
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .chatbot-container {
+        width: 100%;
+        height: 100%;
+        bottom: 0;
+        right: 0;
+        border-radius: 0;
+    }
+    
+    .chatbot-toggle-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+    }
+    
+    .chatbot-toggle-icon {
+        width: 28px;
+        height: 28px;
+    }
+}
+        /* Animation for new messages */
+        @keyframes messageAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-message {
+            animation: messageAppear 0.3s ease-out;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .chatbot-container {
+                width: 100%;
+                height: 100%;
+                bottom: 0;
+                right: 0;
+                border-radius: 0;
+            }
+
+            .chatbot-toggle-btn {
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+
+        /* Add Visual Search Section */
+        .visual-search-section {
+            background: url('https://www.toptal.com/designers/subtlepatterns/patterns/grid.png') repeat;
+            padding: 2rem 0;
+        }
+
+        .visual-search-section .card {
+            background: var(--light-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 15px;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .visual-search-section .card-body {
+            padding: 2rem;
+        }
+
+        .visual-search-section .card-title {
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+        }
+
+        .visual-search-section .form-label {
+            color: var(--dark-color);
+        }
+
+        .visual-search-section .form-control {
+            background: var(--light-color) !important;
+            border: 2px solid var(--accent-color) !important;
+            color: var(--dark-color) !important;
+            border-radius: 10px !important;
+        }
+
+        .visual-search-section .btn-primary {
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            animation: pulse 2s infinite;
+            color: #fff;
+        }
+
+        .visual-search-section .btn-primary:hover {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            transform: scale(1.1);
+        }
+
+        .visual-search-section .btn-danger {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+        }
+
+        .visual-search-section .feature-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            text-shadow: 2px 2px var(--dark-color);
+            animation: spin 2s infinite linear;
+        }
+
+        .visual-search-section .notification-badge {
+            background: var(--primary-color);
+            border-radius: 50%;
+            padding: 5px 10px;
+            animation: bounceIn 1s ease-out;
+            color: #fff;
+        }
+
+        .visual-search-section .notification-badge:hover {
+            transform: scale(1.1);
+        }
+
+        .visual-search-section .similar-items-results {
+            margin-top: 2rem;
+        }
+
+        .visual-search-section .similar-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .visual-search-section .similar-item .image-preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 1rem;
+        }
+
+        .visual-search-section .similar-item .item-details {
+            flex: 1;
+        }
+
+        .visual-search-section .similar-item .item-title {
+            font-size: 1.2rem;
+            color: var(--dark-color);
+        }
+
+        .visual-search-section .similar-item .item-description {
+            font-size: 0.9rem;
+            color: var(--dark-color);
+        }
+
+        .visual-search-section .similar-item .item-link {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        .visual-search-section .similar-item .item-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-search-location me-2"></i>UniLost & Found
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="lost.html">Lost Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="found.html">Found Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About</a>
+                    </li>
+                </ul>
+
+                <!-- Logged Out State -->
+                <div class="auth-buttons" id="loggedOutNav">
+                    <button class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#loginTypeModal">
+                        <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                    </button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#signupModal">
+                        <i class="fas fa-user-plus me-1"></i>Sign Up
+                    </button>
+                </div>
+
+                <!-- Logged In State (Default hidden) -->
+                <div class="auth-buttons" id="loggedInNav" style="display: none;">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="userFullName">User Name</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="dashboard.html"><i
+                                        class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                            <li><a class="dropdown-item" href="my-posts.html"><i class="fas fa-list me-2"></i>My
+                                    Posts</a></li>
+                            <li><a class="dropdown-item" href="my-requests.html"><i class="fas fa-handshake me-2"></i>My
+                                    Requests</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a href="#" class="dropdown-item" onclick="handleLogout()"><i
+                                        class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Custom Alert Modal -->
+    <div class="modal fade custom-alert-modal" id="customAlertModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Action Required</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Please sign in to report a found item.</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginTypeModal"
+                        data-bs-dismiss="modal">
+                        <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Type Modal -->
+    <div class="modal fade" id="loginTypeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sign In As</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <button class="btn btn-primary w-100 py-3" onclick="openStudentLogin()">
+                                <i class="fas fa-user-graduate fa-2x mb-2"></i><br>
+                                <h4>Student</h4>
+                                <p class="mb-0">Sign in with university credentials</p>
+                            </button>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <button class="btn btn-secondary w-100 py-3" onclick="openAdminLogin()">
+                                <i class="fas fa-user-shield fa-2x mb-2"></i><br>
+                                <h4>Administrator</h4>
+                                <p class="mb-0">Sign in with admin credentials</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <p>Don't have an account? <a href="#" onclick="openSignup()">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="modal fade" id="adminLoginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Admin Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="adminLoginForm" onsubmit="return validateAdminLogin(event)">
+                        <div class="mb-3">
+                            <label for="adminEmail" class="form-label">Admin Email</label>
+                            <input type="email" class="form-control" id="adminEmail" placeholder="admin@umt.edu.pk">
+                            <small class="text-danger" id="adminEmailError"></small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adminPassword" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="adminPassword">
+                                <button class="btn btn-outline-secondary" type="button"
+                                    onclick="togglePasswordVisibility('adminPassword', 'adminPasswordToggle')">
+                                    <i class="fas fa-eye" id="adminPasswordToggle"></i>
+                                </button>
+                            </div>
+                            <small class="text-danger" id="adminPasswordError"></small>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="adminRememberMe">
+                            <label class="form-check-label" for="adminRememberMe">Remember me</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login as Admin</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal"
+                            data-bs-dismiss="modal">Forgot password?</a>
+                    </div>
+                    <hr>
+                    <p class="text-center">Not an admin? <a href="#" data-bs-toggle="modal"
+                            data-bs-target="#loginTypeModal" data-bs-dismiss="modal">Sign in as student</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section with faded background -->
+    <section class="hero-section"
+        style="position: relative; background: url('public/images/cover_image.png') no-repeat center center/cover; padding: 100px 0; color: white;">
+
+        <!-- Overlay to fade the image -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5); z-index: 1;"></div>
+
+        <!-- Content with higher z-index -->
+        <div class="container text-center" style="position: relative; z-index: 2;">
+            <h1 class="display-4 fw-bold mb-4">Lost Something on Campus?</h1>
+            <p class="lead mb-5">Connect with fellow students to recover your lost items or help return found belongings
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="#" class="btn btn-primary btn-lg px-4" onclick="checkLoginBeforeAction('lost')">
+                    <i class="fas fa-question-circle me-2"></i>Report Lost Item
+                </a>
+                <a href="#" class="btn btn-outline-primary btn-lg px-4" onclick="checkLoginBeforeAction('found')">
+                    <i class="fas fa-check-circle me-2"></i>Report Found Item
+                </a>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Quick Search Section -->
+        <section class="mb-5">
+            <div class="card shadow-sm"
+                style="background: url('https://cdn.pixabay.com/photo/2016/03/31/14/37/magnifying-glass-1290438_1280.png') no-repeat bottom right/20%;">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Quick Search</h2>
+                    <form id="quickSearchForm" onsubmit="return handleQuickSearch(event)">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="searchType" class="form-label">I'm looking for...</label>
+                                <select class="form-select" id="searchType" required>
+                                    <option value="">Choose...</option>
+                                    <option value="lost">Lost Items</option>
+                                    <option value="found">Found Items</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="itemCategory" class="form-label">Category</label>
+                                <select class="form-select" id="itemCategory">
+                                    <option value="">All Categories</option>
+                                    <option>Electronics</option>
+                                    <option>Books & Notes</option>
+                                    <option>Keys & ID Cards</option>
+                                    <option>Clothing</option>
+                                    <option>Bags & Wallets</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="location" class="form-label">Location</label>
+                                <select class="form-select" id="location">
+                                    <option value="">All Locations</option>
+                                    <option>Main Library</option>
+                                    <option>Science Building</option>
+                                    <option>Student Center</option>
+                                    <option>Sports Complex</option>
+                                    <option>Cafeteria</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="date" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="date">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-search me-2"></i>Search Items
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Add Visual Search Section -->
+        <section class="mb-5 visual-search-section">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Visual Search</h2>
+                    <p class="text-center mb-4">Upload a photo of your lost item to find similar items that have been found.</p>
+                    
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="imageUpload" class="form-label">Upload Image</label>
+                                <input type="file" class="form-control" id="imageUpload" accept="image/*">
+                            </div>
+                            
+                            <div class="text-center mb-4">
+                                <img id="imagePreview" class="img-fluid rounded" style="max-height: 300px; display: none;" alt="Preview">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="similarItemsResults"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search Results Section (Initially Hidden) -->
+        <div id="searchResultsSection" class="mt-4" style="display: none;">
+            <h3 class="mb-4">Search Results</h3>
+            <div class="row" id="searchResults">
+                <!-- Results will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Recent Items Section -->
+        <section class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 style="color: var(--dark-color);">Recently Lost Items</h2>
+                <a href="lost.html" class="btn btn-outline-primary">View All</a>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+                            class="card-img-top" alt="Lost Wallet">
+                        <div class="card-body">
+                            <h5 class="card-title" style="color: var(--dark-color);">Black Leather Wallet</h5>
+                            <p class="card-text"><i class="fas fa-map-marker-alt me-2"
+                                    style="color: var(--accent-color);"></i>Student Center</p>
+                            <p class="card-text"><i class="far fa-calendar-alt me-2"
+                                    style="color: var(--accent-color);"></i>May 28, 2025</p>
+                            <p class="card-text">Lost my wallet containing student ID and credit cards. Reward offered.
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="#" class="btn btn-sm btn-primary" onclick="viewItemDetails({
+                                title: 'Black Leather Wallet',
+                                location: 'Student Center',
+                                date: 'May 28, 2025',
+                                category: 'Wallets & Accessories',
+                                description: 'Lost my wallet containing student ID and credit cards. Reward offered.',
+                                image:'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+                                type: 'lost',
+                                posterName: 'Ahmed Khan',
+                                contactInfo: '+92 300 1234567'
+                            })">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <img src="public/images/phone.jpg"
+                            class="card-img-top" alt="Lost Phone">
+                        <div class="card-body">
+                            <h5 class="card-title" style="color: var(--dark-color);">iPhone 13 Pro</h5>
+                            <p class="card-text"><i class="fas fa-map-marker-alt me-2"
+                                    style="color: var(--accent-color);"></i>Science Building</p>
+                            <p class="card-text"><i class="far fa-calendar-alt me-2"
+                                    style="color: var(--accent-color);"></i>May 29, 2025</p>
+                            <p class="card-text">Silver iPhone with blue case. Lost during physics lab.</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="#" class="btn btn-sm btn-primary" onclick="viewItemDetails({
+                                title: 'iPhone 13 Pro',
+                                location: 'Science Building',
+                                date: 'May 29, 2025',
+                                category: 'Electronics',
+                                description: 'Silver iPhone with blue case. Lost during physics lab.',
+                                image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+                                type: 'lost',
+                                posterName: 'Sara Ahmed',
+                                contactInfo: '+92 300 9876543'
+                            })">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <img src="public/images/notebook.jpg"
+                            class="card-img-top" alt="Lost Notebook">
+                        <div class="card-body">
+                            <h5 class="card-title" style="color: var(--dark-color);">Chemistry Notebook</h5>
+                            <p class="card-text"><i class="fas fa-map-marker-alt me-2"
+                                    style="color: var(--accent-color);"></i>Main Library</p>
+                            <p class="card-text"><i class="far fa-calendar-alt me-2"
+                                    style="color: var(--accent-color);"></i>May 30, 2025</p>
+                            <p class="card-text">Red notebook with all my organic chemistry notes. Please return!</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="#" class="btn btn-sm btn-primary" onclick="viewItemDetails({
+                                title: 'Chemistry Notebook',
+                                location: 'Main Library',
+                                date: 'May 30, 2025',
+                                category: 'Books & Notes',
+                                description: 'Red notebook with all my organic chemistry notes. Please return!',
+                                image: 'https://images.unsplash.com/photo-1544198365-9e2b55a6f3b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+                                type: 'lost',
+                                posterName: 'Fatima Ali',
+                                contactInfo: '+92 300 5555555'
+                            })">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 style="color: var(--dark-color);">Recently Found Items</h2>
+                <a href="found.html" class="btn btn-outline-primary">View All</a>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                       <img src="public/images/keys.jpg"
+                            class="card-img-top" alt="Found Keys">
+                        <div class="card-body">
+                            <h5 class="card-title" style="color: var(--dark-color);">Set of Keys</h5>
+                            <p class="card-text"><i class="fas fa-map-marker-alt me-2"
+                                    style="color: var(--accent-color);"></i>Cafeteria</p>
+                            <p class="card-text"><i class="far fa-calendar-alt me-2"
+                                    style="color: var(--accent-color);"></i>May 28, 2025</p>
+                            <p class="card-text">Found on table near the entrance. Includes car key and dorm key.</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="#" class="btn btn-sm btn-primary" onclick="viewItemDetails({
+                                title: 'Set of Keys',
+                                location: 'Cafeteria',
+                                date: 'May 28, 2025',
+                                category: 'Keys & ID Cards',
+                                description: 'Found on table near the entrance. Includes car key and dorm key.',
+                                image: 'https://images.unsplash.com/photo-1600585154526-990d71b8f986?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+                                type: 'found',
+                                posterName: 'Hassan Raza',
+                                contactInfo: '+92 300 7777777'
+                            })">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <img src="public/images/headphones.jpg"
+                            class="card-img-top" alt="Found Headphones">
+                        <div class="card-body">
+                            <h5 class="card-title" style="color: var(--dark-color);">Wireless Headphones</h5>
+                            <p class="card-text"><i class="fas fa-map-marker-alt me-2"
+                                    style="color: var(--accent-color);"></i>Sports Complex</p>
+                            <p class="card-text"><i class="far fa-calendar-alt me-2"
+                                    style="color: var(--accent-color);"></i>May 29, 2025</p>
+                            <p class="card-text">Black Sony headphones found in locker room.</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="#" class="btn btn-sm btn-primary" onclick="viewItemDetails({
+                                title: 'Wireless Headphones',
+                                location: 'Sports Complex',
+                                date: 'May 29, 2025',
+                                category: 'Electronics',
+                                description: 'Black Sony headphones found in locker room.',
+                                image: 'https://images.unsplash.com/photo-1596552589712-8d7d678c5e0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+                                type: 'found',
+                                posterName: 'Zainab Khan',
+                                contactInfo: '+92 300 8888888'
+                            })">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <img src="public/images/hydroflask (3).jpg"
+                            class="card-img-top" alt="Found Water Bottle">
+                        <div class="card-body">
+                            <h5 class="card-title" style="color: var(--dark-color);">Hydro Flask</h5>
+                            <p class="card-text"><i class="fas fa-map-marker-alt me-2"
+                                    style="color: var(--accent-color);"></i>Math Building</p>
+                            <p class="card-text"><i class="far fa-calendar-alt me-2"
+                                    style="color: var(--accent-color);"></i>May 30, 2025</p>
+                            <p class="card-text">Blue 32oz Hydro Flask with stickers on it.</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="#" class="btn btn-sm btn-primary" onclick="viewItemDetails({
+                                title: 'Hydro Flask',
+                                location: 'Math Building',
+                                date: 'May 30, 2025',
+                                category: 'Other',
+                                description: 'Blue 32oz Hydro Flask with stickers on it.',
+                                image: 'https://images.unsplash.com/photo-1600585154100-2a36587b9a1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+                                type: 'found',
+                                posterName: 'Usman Ali',
+                                contactInfo: '+92 300 9999999'
+                            })">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="mb-5"
+            style="background: url('https://www.toptal.com/designers/subtlepatterns/patterns/grid.png') repeat; padding: 2rem 0;">
+            <h2 class="text-center mb-5" style="color: var(--dark-color);">How It Works</h2>
+            <div class="row text-center">
+                <div class="col-md-4 mb-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h4 style="color: var(--dark-color);">1. Create Account</h4>
+                    <p>Sign up with your university email to verify your student status and start using the platform.
+                    </p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <h4 style="color: var(--dark-color);">2. Report Item</h4>
+                    <p>Submit details about your lost item or a found item with photos and location information.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h4 style="color: var(--dark-color);">3. Get Notified</h4>
+                    <p>Receive automatic notifications when a potential match is found for your lost item.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h4 style="color: var(--dark-color);">4. Chat Securely</h4>
+                    <p>Communicate with the finder or owner through our secure messaging system.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h4 style="color: var(--dark-color);">5. Arrange Return</h4>
+                    <p>Coordinate a safe return of the item with the other party.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h4 style="color: var(--dark-color);">6. Confirm Resolution</h4>
+                    <p>Mark the item as returned to help us improve our matching system.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="mb-5">
+            <div class="card bg-light"
+                style="background: url('https://www.toptal.com/designers/subtlepatterns/patterns/lightpaperfibers.png') repeat;">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h3 class="display-4 fw-bold">1,250+</h3>
+                            <p class="lead" style="color: var(--dark-color);">Items Reunited</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 class="display-4 fw-bold">850+</h3>
+                            <p class="lead" style="color: var(--dark-color);">Active Users</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 class="display-4 fw-bold">95%</h3>
+                            <p class="lead" style="color: var(--dark-color);">Success Rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- QR Code Section -->
+    <section id="qrCodeSection" class="mb-5" style="display: none;">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4" style="color: var(--dark-color);">Protect Your Belongings</h2>
+                <p class="text-center mb-4" style="color: var(--dark-color);">
+                    Generate a QR code to attach to your belongings. If someone finds your item, they can scan the QR
+                    code to report it.
+                </p>
+                <div class="text-center">
+                    <button class="btn btn-primary mb-3" id="generateQrBtn">
+                        <i class="fas fa-qrcode me-2"></i>Generate Your QR Code
+                    </button>
+                </div>
+                <div class="qr-container text-center" id="qrContainer" style="display: none;">
+                    <img id="qrCodeImg" src="#" alt="QR Code" class="mb-3">
+                    <p style="color: var(--dark-color); font-size: 0.9rem; margin-bottom: 1rem;">
+                        Print this QR code and attach it to your belongings.
+                    </p>
+                    <a href="#" id="qrDownloadLink" class="btn btn-primary">
+                        <i class="fas fa-download me-2"></i>Download QR Code
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4"
+        style="background: url('https://cdn.pixabay.com/photo/2016/11/19/14/00/icon-1838360_1280.png') no-repeat center/20%;">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>About UniLost & Found</h5>
+                    <p>A platform dedicated to helping university students recover their lost belongings and return
+                        found items to their rightful owners.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white">Home</a></li>
+                        <li><a href="lost.html" class="text-white">Lost Items</a></li>
+                        <li><a href="found.html" class="text-white">Found Items</a></li>
+                        <li><a href="about.html" class="text-white">About</a></li>
+                        <li><a href="contact.html" class="text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-envelope me-2"></i>lostandfound@university.edu</li>
+                        <li><i class="fas fa-phone me-2"></i>(123) 456-7890</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i>Student Services Building, Room 205</li>
+                    </ul>
+                    <div class="mt-3">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p class="mb-0">© 2025 University Lost & Found System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Student Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Student Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="studentLoginForm">
+                        <div class="mb-3">
+                            <label for="loginEmail" class="form-label">University Email</label>
+                            <input type="email" class="form-control" id="loginEmail" placeholder="name@umt.edu.pk"
+                                required>
+                            <small class="text-danger" id="loginEmailError"></small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="loginPassword" required>
+                                <button class="btn btn-outline-secondary" type="button"
+                                    onclick="togglePasswordVisibility('loginPassword', 'loginPasswordToggle')">
+                                    <i class="fas fa-eye" id="loginPasswordToggle"></i>
+                                </button>
+                            </div>
+                            <small class="text-danger" id="loginPasswordError"></small>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">Remember me</label>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100"
+                            onclick="handleStudentLogin()">Login</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal"
+                            data-bs-dismiss="modal">Forgot password?</a>
+                    </div>
+                    <hr>
+                    <p class="text-center">Don't have an account? <a href="#" data-bs-toggle="modal"
+                            data-bs-target="#signupModal" data-bs-dismiss="modal">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal fade" id="signupModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Your Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="signupForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="signupFirstName" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="signupFirstName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="signupLastName" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="signupLastName" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signupEmail" class="form-label">University Email</label>
+                            <input type="email" class="form-control" id="signupEmail" placeholder="name@umt.edu.pk"
+                                required>
+                            <small class="text-danger" id="signupEmailError"></small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signupPassword" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="signupPassword" required>
+                                <button class="btn btn-outline-secondary" type="button"
+                                    onclick="togglePasswordVisibility('signupPassword', 'signupPasswordToggle')">
+                                    <i class="fas fa-eye" id="signupPasswordToggle"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength mt-2">
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar" id="passwordStrength" role="progressbar"
+                                        style="width: 0%"></div>
+                                </div>
+                                <small class="text-muted" id="passwordStrengthText">Password strength: None</small>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signupConfirmPassword" class="form-label">Confirm Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="signupConfirmPassword" required>
+                                <button class="btn btn-outline-secondary" type="button"
+                                    onclick="togglePasswordVisibility('signupConfirmPassword', 'confirmPasswordToggle')">
+                                    <i class="fas fa-eye" id="confirmPasswordToggle"></i>
+                                </button>
+                            </div>
+                            <small class="text-danger" id="passwordMatchError"></small>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                            <label class="form-check-label" for="agreeTerms">I agree to the <a href="#">Terms of
+                                    Service</a> and <a href="#">Privacy Policy</a></label>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100" onclick="handleSignup()">Create
+                            Account</button>
+                    </form>
+                    <hr>
+                    <p class="text-center">Already have an account? <a href="#" data-bs-toggle="modal"
+                            data-bs-target="#loginModal" data-bs-dismiss="modal">Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reset Your Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="forgotEmail" class="form-label">University Email</label>
+                            <input type="email" class="form-control" id="forgotEmail" placeholder="name@university.edu">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Send Reset Link</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">Back to
+                            login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Chatbot Container -->
+<div id="chatbot-container" class="chatbot-container">
+    <div class="chatbot-header">
+        <div class="chatbot-title">
+            <img src="public/images/robot_5226174.png" class="chatbot-custom-icon" alt="Chatbot Icon"> 
+            UMT Belongings Assistant
+        </div>
+        <button class="chatbot-close-btn" onclick="toggleChatbot()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="chatbot-messages" id="chatbot-messages">
+        <div class="chatbot-welcome">
+            <p><i class="fas fa-hand-sparkles"></i> Hello! I'm here to help you with lost and found items at UMT. How can I assist you today?</p>
+            <div class="quick-questions">
+                <button class="quick-question-btn" onclick="sendQuickQuestion('How do I report a lost item?')">
+                    <i class="fas fa-search-location"></i> Report lost item
+                </button>
+                <button class="quick-question-btn" onclick="sendQuickQuestion('How do I report a found item?')">
+                    <i class="fas fa-hands-helping"></i> Report found item
+                </button>
+                <button class="quick-question-btn" onclick="sendQuickQuestion('What items are commonly lost?')">
+                    <i class="fas fa-clipboard-list"></i> Common lost items
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="chatbot-input">
+        <input type="text" id="chatbot-user-input" placeholder="Type your question here..."
+            onkeypress="handleChatbotInput(event)">
+        <button class="chatbot-send-btn" onclick="sendChatbotMessage()">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Chatbot Toggle Button -->
+<button class="chatbot-toggle-btn" onclick="toggleChatbot()">
+    <div class="icon-container">
+        <img src="public/images/robot_5226174.png" class="chatbot-toggle-icon" alt="Chatbot">
+        <span class="notification-badge">1</span>
+    </div>
+</button>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Simulated login state
+            let isLoggedIn = false;
+
+            // Report found button logic
+            const reportFoundButton = document.querySelector('a[href="report-found.html"]');
+            if (reportFoundButton) {
+                reportFoundButton.addEventListener('click', function (event) {
+                    if (!isLoggedIn) {
+                        event.preventDefault();
+                        const alertModal = new bootstrap.Modal(document.getElementById('customAlertModal'));
+                        alertModal.show();
+                    }
+                });
+            }
+
+            // Notification badge update
+            console.log('Page loaded at 01:06 AM PKT, May 31, 2025');
+            setInterval(function () {
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    const count = parseInt(badge.textContent);
+                    if (count < 99) {
+                        badge.textContent = count + 1;
+                    }
+                }
+            }, 10000);
+
+            // Trigger slide-in animation for Features section
+            document.addEventListener('scroll', function () {
+                document.querySelectorAll('.col-md-4').forEach(col => {
+                    if (col.getBoundingClientRect().top < window.innerHeight) col.classList.add('in-view');
+                });
+            });
+
+            // Initialize image similarity feature
+            initImageSimilarity('imageUpload', 'imagePreview', 'similarItemsResults');
+        });
+
+        // Example pseudo-code for OpenAI integration
+        async function getAIResponse(message) {
+            const response = await fetch('your-backend-api', {
+                method: 'POST',
+                body: JSON.stringify({ prompt: message })
+            });
+            const data = await response.json();
+            return data.reply;
+        }
+
+        // Initialize registeredUsers array from localStorage
+        let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+
+        // Handle logout function
+        function handleLogout() {
+            // Clear user data from localStorage
+            localStorage.removeItem('currentUser');
+
+            // Show logout success message
+            Swal.fire({
+                title: 'Logged Out Successfully',
+                text: 'You have been logged out of your account',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                // Update UI
+                document.getElementById('loggedInNav').style.display = 'none';
+                document.getElementById('loggedOutNav').style.display = 'block';
+
+                // Redirect to home page
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Update UI for logged in user
+        function updateUIForLoggedInUser(user) {
+            document.getElementById('loggedOutNav').style.display = 'none';
+            document.getElementById('loggedInNav').style.display = 'block';
+            document.getElementById('userFullName').textContent = `${user.firstName} ${user.lastName}`;
+
+            // Update dropdown menu items based on user type
+            const dashboardLink = document.querySelector('a[href="dashboard.html"]');
+            if (user.isAdmin) {
+                dashboardLink.href = 'admin.html';
+                dashboardLink.innerHTML = '<i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard';
+            }
+        }
+
+        // Handle signup function
+        function handleSignup() {
+            const firstName = document.getElementById('signupFirstName').value;
+            const lastName = document.getElementById('signupLastName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+            const agreeTerms = document.getElementById('agreeTerms').checked;
+
+            // Reset error messages
+            document.getElementById('signupEmailError').textContent = '';
+            document.getElementById('passwordMatchError').textContent = '';
+
+            // Name validation
+            if (!/^[a-zA-Z\s]{2,30}$/.test(firstName)) {
+                Swal.fire({
+                    title: 'Invalid First Name',
+                    text: 'First name should be 2-30 characters long and contain only letters',
+                    icon: 'error'
+                });
+                return;
+            }
+
+            if (!/^[a-zA-Z\s]{2,30}$/.test(lastName)) {
+                Swal.fire({
+                    title: 'Invalid Last Name',
+                    text: 'Last name should be 2-30 characters long and contain only letters',
+                    icon: 'error'
+                });
+                return;
+            }
+
+            // Validate required fields
+            if (!firstName || !lastName || !email || !password || !confirmPassword) {
+                Swal.fire({
+                    title: 'Missing Information',
+                    text: 'Please fill in all required fields',
+                    icon: 'warning'
+                });
+                return;
+            }
+
+            // Validate terms agreement
+            if (!agreeTerms) {
+                Swal.fire({
+                    title: 'Terms Not Accepted',
+                    text: 'Please agree to the Terms of Service and Privacy Policy to continue',
+                    icon: 'warning'
+                });
+                return;
+            }
+
+            // Validate email domain
+            if (!validateUMTEmail(email)) {
+                Swal.fire({
+                    title: 'Invalid Email',
+                    text: 'Please use your UMT email address (@umt.edu.pk)',
+                    icon: 'error'
+                });
+                document.getElementById('signupEmailError').textContent = 'Please use your UMT email address (@umt.edu.pk)';
+                return;
+            }
+
+            // Check if email already exists
+            if (registeredUsers.some(user => user.email === email)) {
+                Swal.fire({
+                    title: 'Email Already Registered',
+                    text: 'This email is already registered. Please login instead.',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Go to Login',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const signupModal = bootstrap.Modal.getInstance(document.getElementById('signupModal'));
+                        signupModal.hide();
+                        setTimeout(() => {
+                            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                            loginModal.show();
+                        }, 500);
+                    }
+                });
+                return;
+            }
+
+            // Check password strength
+            if (checkPasswordStrength(password) < 75) {
+                Swal.fire({
+                    title: 'Weak Password',
+                    text: 'Please choose a stronger password. It should include uppercase, lowercase, numbers, and special characters.',
+                    icon: 'warning'
+                });
+                return;
+            }
+
+            // Validate password match
+            if (password !== confirmPassword) {
+                Swal.fire({
+                    title: 'Password Mismatch',
+                    text: 'Passwords do not match. Please try again.',
+                    icon: 'error'
+                });
+                document.getElementById('passwordMatchError').textContent = 'Passwords do not match';
+                return;
+            }
+
+            // Create user data
+            const userData = {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: password,
+                registrationDate: new Date().toISOString(),
+                lastLogin: new Date().toISOString()
+            };
+
+            // Add to registered users array and save to localStorage
+            registeredUsers.push(userData);
+            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+
+            // Show success message and redirect
+            Swal.fire({
+                title: 'Account Created Successfully!',
+                text: 'Welcome to UMT Belongings Hub!',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('signupModal'));
+                modal.hide();
+                document.getElementById('signupForm').reset();
+                updateUIForLoggedInUser(userData);
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Student login handler
+        function handleStudentLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const emailError = document.getElementById('loginEmailError');
+            const passwordError = document.getElementById('loginPasswordError');
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            // Reset error messages
+            emailError.textContent = '';
+            passwordError.textContent = '';
+
+            // Validate required fields
+            if (!email || !password) {
+                Swal.fire({
+                    title: 'Missing Information',
+                    text: 'Please fill in all required fields',
+                    icon: 'warning'
+                });
+                return;
+            }
+
+            // Validate email domain
+            if (!validateUMTEmail(email)) {
+                Swal.fire({
+                    title: 'Invalid Email',
+                    text: 'Please use your UMT email address (@umt.edu.pk)',
+                    icon: 'error'
+                });
+                emailError.textContent = 'Please use your UMT email address (@umt.edu.pk)';
+                return;
+            }
+
+            // Get registered users from localStorage
+            const storedUsers = localStorage.getItem('registeredUsers');
+            const registeredUsers = storedUsers ? JSON.parse(storedUsers) : [];
+
+            // Check if user exists
+            const user = registeredUsers.find(u => u.email === email);
+            if (!user) {
+                Swal.fire({
+                    title: 'Account Not Found',
+                    text: 'Please create an account first to continue.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Create Account',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+                        loginModal.hide();
+                        setTimeout(() => {
+                            const signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
+                            signupModal.show();
+                        }, 500);
+                    }
+                });
+                return;
+            }
+
+            // Validate password
+            if (user.password !== password) {
+                // Increment failed login attempts
+                user.failedAttempts = (user.failedAttempts || 0) + 1;
+
+                // Update user in localStorage
+                const updatedUsers = registeredUsers.map(u => u.email === email ? user : u);
+                localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+
+                // Check if account should be locked
+                if (user.failedAttempts >= 5) {
+                    Swal.fire({
+                        title: 'Account Locked',
+                        text: 'Too many failed attempts. Please reset your password or contact support.',
+                        icon: 'error',
+                        confirmButtonText: 'Reset Password'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+                            loginModal.hide();
+                            setTimeout(() => {
+                                const forgotPasswordModal = new bootstrap.Modal(document.getElementById('forgotPasswordModal'));
+                                forgotPasswordModal.show();
+                            }, 500);
+                        }
+                    });
+                    return;
+                }
+
+                passwordError.textContent = 'Incorrect password';
+                Swal.fire({
+                    title: 'Login Failed',
+                    text: `Incorrect password. ${5 - user.failedAttempts} attempts remaining.`,
+                    icon: 'error'
+                });
+                return;
+            }
+
+            // Reset failed attempts on successful login
+            user.failedAttempts = 0;
+            user.lastLogin = new Date().toISOString();
+
+            // Update user in localStorage
+            const updatedUsers = registeredUsers.map(u => u.email === email ? user : u);
+            localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+
+            // Handle remember me
+            if (rememberMe) {
+                localStorage.setItem('rememberedUser', email);
+            } else {
+                localStorage.removeItem('rememberedUser');
+            }
+
+            // Store current user
+            localStorage.setItem('currentUser', JSON.stringify(user));
+
+            // Show success message
+            Swal.fire({
+                title: 'Login Successful!',
+                text: 'Welcome back to UMT Belongings Hub!',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+                loginModal.hide();
+                updateUIForLoggedInUser(user);
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Email validation function
+        function validateUMTEmail(email) {
+            return email.toLowerCase().endsWith('@umt.edu.pk');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Only clear session if coming from a fresh load of index.html
+            if (!document.referrer.includes(window.location.hostname)) {
+                localStorage.removeItem('currentUser');
+                // Show logged out state
+                document.getElementById('loggedInNav').style.display = 'none';
+                document.getElementById('loggedOutNav').style.display = 'block';
+            } else {
+                // Check for existing session
+                const currentUser = localStorage.getItem('currentUser');
+                if (currentUser) {
+                    updateUIForLoggedInUser(JSON.parse(currentUser));
+                } else {
+                    document.getElementById('loggedInNav').style.display = 'none';
+                    document.getElementById('loggedOutNav').style.display = 'block';
+                }
+            }
+
+            // Load registered users from localStorage
+            const storedUsers = localStorage.getItem('registeredUsers');
+            if (storedUsers) {
+                registeredUsers = JSON.parse(storedUsers);
+            }
+
+            // Add click event listener to all logout buttons
+            const logoutButtons = document.querySelectorAll('[onclick="handleLogout()"]');
+            logoutButtons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    handleLogout();
+                });
+            });
+        });
+
+        // Password visibility toggle
+        function togglePasswordVisibility(inputId, toggleId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(toggleId);
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                toggleIcon.classList.remove("fa-eye");
+                toggleIcon.classList.add("fa-eye-slash");
+            } else {
+                passwordInput.type = "password";
+                toggleIcon.classList.remove("fa-eye-slash");
+                toggleIcon.classList.add("fa-eye");
+            }
+        }
+
+        // Check password strength
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            const progressBar = document.getElementById('passwordStrength');
+            const strengthText = document.getElementById('passwordStrengthText');
+
+            // Length check
+            if (password.length >= 8) strength += 15;
+            if (password.length >= 12) strength += 10;
+
+            // Character type checks
+            if (password.match(/[A-Z]/)) strength += 15;  // Uppercase
+            if (password.match(/[a-z]/)) strength += 15;  // Lowercase
+            if (password.match(/[0-9]/)) strength += 15;  // Numbers
+            if (password.match(/[!@#$%^&*(),.?":{}|<>]/)) strength += 15;  // Special characters
+
+            // Additional checks
+            if (password.length >= 8 &&
+                password.match(/[A-Z]/) &&
+                password.match(/[a-z]/) &&
+                password.match(/[0-9]/) &&
+                password.match(/[!@#$%^&*(),.?":{}|<>]/)) {
+                strength += 15; // Bonus for having all character types
+            }
+
+            progressBar.style.width = strength + '%';
+
+            if (strength < 50) {
+                progressBar.className = 'progress-bar bg-danger';
+                strengthText.textContent = 'Password strength: Weak - Must include uppercase, lowercase, number, and special character';
+            } else if (strength < 75) {
+                progressBar.className = 'progress-bar bg-warning';
+                strengthText.textContent = 'Password strength: Medium - Consider adding more character types or length';
+            } else {
+                progressBar.className = 'progress-bar bg-success';
+                strengthText.textContent = 'Password strength: Strong';
+            }
+
+            return strength;
+        }
+
+        // Add password strength check on input
+        document.getElementById('signupPassword').addEventListener('input', function () {
+            checkPasswordStrength(this.value);
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Update the Sign In button to open loginTypeModal
+            const signInButtons = document.querySelectorAll('[data-bs-target="#loginModal"]');
+            signInButtons.forEach(button => {
+                button.setAttribute('data-bs-target', '#loginTypeModal');
+            });
+        });
+
+        // Add admin login validation
+        function validateAdminLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const emailError = document.getElementById('adminEmailError');
+            const passwordError = document.getElementById('adminPasswordError');
+            const rememberMe = document.getElementById('adminRememberMe').checked;
+
+            // Reset error messages
+            emailError.textContent = '';
+            passwordError.textContent = '';
+
+            // Get failed attempts from localStorage
+            let adminFailedAttempts = parseInt(localStorage.getItem('adminFailedAttempts') || '0');
+
+            // Check if admin login is locked
+            if (adminFailedAttempts >= 3) {
+                const lockTime = parseInt(localStorage.getItem('adminLockTime') || '0');
+                const currentTime = new Date().getTime();
+                const remainingTime = Math.ceil((lockTime + 30 * 60 * 1000 - currentTime) / (60 * 1000)); // 30 minutes lockout
+
+                if (currentTime < lockTime + 30 * 60 * 1000) {
+                    Swal.fire({
+                        title: 'Admin Access Locked',
+                        text: `Too many failed attempts. Please try again in ${remainingTime} minutes.`,
+                        icon: 'error'
+                    });
+                    return false;
+                } else {
+                    // Reset lock if time has passed
+                    localStorage.removeItem('adminFailedAttempts');
+                    localStorage.removeItem('adminLockTime');
+                    adminFailedAttempts = 0;
+                }
+            }
+
+            // First check if it's not a UMT email
+            if (!email.toLowerCase().endsWith('@umt.edu.pk')) {
+                Swal.fire({
+                    title: 'Unauthorized Access',
+                    text: 'Only UMT authorized personnel can access the admin panel.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                emailError.textContent = 'Please use your UMT admin email address (@umt.edu.pk)';
+                return false;
+            }
+
+            // Check if it's the admin email
+            if (email !== 'admin@umt.edu.pk') {
+                // Show notification for student emails
+                Swal.fire({
+                    title: 'Student Account Detected',
+                    text: 'Please use the student login option if you are a student.',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Go to Student Login',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const adminLoginModal = bootstrap.Modal.getInstance(document.getElementById('adminLoginModal'));
+                        adminLoginModal.hide();
+                        setTimeout(() => {
+                            const studentLoginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                            studentLoginModal.show();
+                        }, 500);
+                    }
+                });
+                return false;
+            }
+
+            if (password !== 'Admin@UMT2024') {
+                // Increment failed attempts
+                adminFailedAttempts++;
+                localStorage.setItem('adminFailedAttempts', adminFailedAttempts);
+
+                if (adminFailedAttempts >= 3) {
+                    // Set lock time
+                    localStorage.setItem('adminLockTime', new Date().getTime().toString());
+                    Swal.fire({
+                        title: 'Admin Access Locked',
+                        text: 'Too many failed attempts. Please try again in 30 minutes.',
+                        icon: 'error'
+                    });
+                    return false;
+                }
+
+                passwordError.textContent = 'Invalid admin password';
+                Swal.fire({
+                    title: 'Login Failed',
+                    text: `Invalid password. ${3 - adminFailedAttempts} attempts remaining before temporary lockout.`,
+                    icon: 'error'
+                });
+                return false;
+            }
+
+            // Reset failed attempts on successful login
+            localStorage.removeItem('adminFailedAttempts');
+            localStorage.removeItem('adminLockTime');
+
+            // Store admin session
+            const adminData = {
+                firstName: 'Admin',
+                lastName: 'User',
+                email: email,
+                isAdmin: true,
+                lastLogin: new Date().toISOString()
+            };
+
+            // Handle remember me
+            if (rememberMe) {
+                localStorage.setItem('rememberedAdmin', email);
+            } else {
+                localStorage.removeItem('rememberedAdmin');
+            }
+
+            localStorage.setItem('currentUser', JSON.stringify(adminData));
+
+            // Show success message
+            Swal.fire({
+                title: 'Admin Login Successful!',
+                text: 'Welcome to Admin Dashboard!',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                // Update UI and redirect
+                updateUIForLoggedInUser(adminData);
+                window.location.href = 'admin.html';
+            });
+
+            return false;
+        }
+
+        // Modal handling functions
+        function openStudentLogin() {
+            // Close the login type modal
+            const loginTypeModal = bootstrap.Modal.getInstance(document.getElementById('loginTypeModal'));
+            loginTypeModal.hide();
+
+            // Wait for the first modal to close, then open student login
+            setTimeout(() => {
+                const studentLoginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                studentLoginModal.show();
+            }, 500);
+        }
+
+        function openAdminLogin() {
+            // Close the login type modal
+            const loginTypeModal = bootstrap.Modal.getInstance(document.getElementById('loginTypeModal'));
+            loginTypeModal.hide();
+
+            // Wait for the first modal to close, then open admin login
+            setTimeout(() => {
+                const adminLoginModal = new bootstrap.Modal(document.getElementById('adminLoginModal'));
+                adminLoginModal.show();
+            }, 500);
+        }
+
+        function openSignup() {
+            // Close the login type modal
+            const loginTypeModal = bootstrap.Modal.getInstance(document.getElementById('loginTypeModal'));
+            loginTypeModal.hide();
+
+            // Wait for the first modal to close, then open signup
+            setTimeout(() => {
+                const signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
+                signupModal.show();
+            }, 500);
+        }
+
+        // Initialize modals on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize all modals
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                new bootstrap.Modal(modal);
+            });
+        });
+
+        // Add login check functions
+        function checkLoginBeforeAction(type) {
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                Swal.fire({
+                    title: 'Login Required',
+                    text: 'Please sign in or create an account to ' + (type === 'lost' ? 'report a lost item' : 'report a found item'),
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sign In',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const loginTypeModal = new bootstrap.Modal(document.getElementById('loginTypeModal'));
+                        loginTypeModal.show();
+                    }
+                });
+            } else {
+                // If logged in, redirect to appropriate page
+                window.location.href = type + '.html';
+            }
+        }
+
+        function handleQuickSearch(event) {
+            event.preventDefault();
+
+            // Check if user is logged in
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                Swal.fire({
+                    title: 'Login Required',
+                    text: 'Please sign in or create an account to search for items',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sign In',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const loginTypeModal = new bootstrap.Modal(document.getElementById('loginTypeModal'));
+                        loginTypeModal.show();
+                    }
+                });
+                return false;
+            }
+
+            // Get form values
+            const searchType = document.getElementById('searchType').value;
+            const category = document.getElementById('itemCategory').value;
+            const location = document.getElementById('location').value;
+            const date = document.getElementById('date').value;
+
+            // Get sample data (in a real app, this would come from your backend)
+            const sampleData = getSampleData(searchType);
+
+            // Filter results based on criteria
+            let filteredResults = sampleData.filter(item => {
+                let matches = true;
+                if (category && category !== 'All Categories') {
+                    matches = matches && item.category === category;
+                }
+                if (location && location !== 'All Locations') {
+                    matches = matches && item.location === location;
+                }
+                if (date) {
+                    matches = matches && item.date === date;
+                }
+                return matches;
+            });
+
+            // Display results
+            displaySearchResults(filteredResults);
+
+            // Show results section
+            document.getElementById('searchResultsSection').style.display = 'block';
+
+            // Scroll to results
+            document.getElementById('searchResultsSection').scrollIntoView({ behavior: 'smooth' });
+
+            return false;
+        }
+
+        function getSampleData(type) {
+            // Sample data - in a real app, this would come from your backend
+            const items = [
+                {
+                    id: 1,
+                    title: 'Black Leather Wallet',
+                    category: 'Bags & Wallets',
+                    location: 'Student Center',
+                    date: '2025-05-28',
+                    description: 'Lost my wallet containing student ID and credit cards. Reward offered.',
+                    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+                    type: 'lost',
+                    posterName: 'Ahmed Khan',
+                    contactInfo: '+92 300 1234567'
+                },
+                {
+                    id: 2,
+                    title: 'iPhone 13 Pro',
+                    category: 'Electronics',
+                    location: 'Science Building',
+                    date: '2025-05-29',
+                    description: 'Silver iPhone with blue case. Lost during physics lab.',
+                    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+                    type: 'lost',
+                    posterName: 'Sara Ahmed',
+                    contactInfo: '+92 300 9876543'
+                },
+                {
+                    id: 3,
+                    title: 'Chemistry Notebook',
+                    category: 'Books & Notes',
+                    location: 'Main Library',
+                    date: '2025-05-30',
+                    description: 'Red notebook with all my organic chemistry notes.',
+                    image: 'https://images.unsplash.com/photo-1544198365-9e2b55a6f3b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+                    type: 'lost',
+                    posterName: 'Fatima Ali',
+                    contactInfo: '+92 300 5555555'
+                }
+            ];
+
+            return items.filter(item => item.type === type);
+        }
+
+        function displaySearchResults(results) {
+            const resultsContainer = document.getElementById('searchResults');
+            resultsContainer.innerHTML = '';
+
+            if (results.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="col-12 text-center">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>No items found matching your criteria
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            results.forEach(item => {
+                const itemCard = `
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <img src="${item.image}" class="card-img-top" alt="${item.title}">
+                            <div class="card-body">
+                                <h5 class="card-title">${item.title}</h5>
+                                <p class="card-text">
+                                    <i class="fas fa-map-marker-alt me-2" style="color: var(--accent-color);"></i>${item.location}<br>
+                                    <i class="far fa-calendar-alt me-2" style="color: var(--accent-color);"></i>${item.date}
+                                </p>
+                                <p class="card-text">${item.description}</p>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="#" class="btn btn-sm btn-primary" onclick='viewItemDetails(${JSON.stringify(item)})'>View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                resultsContainer.innerHTML += itemCard;
+            });
+        }
+
+        // Add view details function
+        function viewItemDetails(itemData) {
+            // Store the item data in localStorage
+            localStorage.setItem('currentItemDetails', JSON.stringify(itemData));
+            // Redirect to the details page
+            window.location.href = 'item-details.html';
+        }
+        //QR-CODE JS
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const qrCodeSection = document.getElementById('qrCodeSection');
+            const generateQrBtn = document.getElementById('generateQrBtn');
+            const qrContainer = document.getElementById('qrContainer');
+            const qrCodeImg = document.getElementById('qrCodeImg');
+            const qrDownloadLink = document.getElementById('qrDownloadLink');
+
+            // Show QR code section only for logged-in users
+            if (currentUser) {
+                qrCodeSection.style.display = 'block';
+            }
+
+            generateQrBtn.addEventListener('click', function () {
+                if (!currentUser) {
+                    Swal.fire({
+                        title: 'Login Required',
+                        text: 'Please sign in to generate a QR code for your belongings.',
+                        icon: 'info',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sign In',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const loginTypeModal = new bootstrap.Modal(document.getElementById('loginTypeModal'));
+                            loginTypeModal.show();
+                        }
+                    });
+                    return;
+                }
+
+                // Generate a unique URL for the user (simulated)
+                // In a real app, this would link to a claim page with the user's ID
+                const userId = btoa(currentUser.email); // Base64 encode email for simplicity
+                const claimUrl = `${window.location.origin}/claim?userId=${userId}`;
+
+                // Generate QR code using QR Server API (300x300 for print quality)
+                const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(claimUrl)}`;
+
+                qrCodeImg.src = qrApiUrl;
+                qrDownloadLink.href = qrApiUrl;
+                qrDownloadLink.download = `qr-code-${userId}.png`;
+
+                qrContainer.style.display = 'block';
+
+                Swal.fire({
+                    title: 'QR Code Generated',
+                    text: 'Attach this QR code to your belongings. Anyone who finds your item can scan it to contact you.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                // Scroll to the QR code
+                qrContainer.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+        // Chatbot functionality
+        function toggleChatbot() {
+            const chatbot = document.getElementById('chatbot-container');
+            if (chatbot.style.display === 'flex') {
+                chatbot.style.display = 'none';
+            } else {
+                chatbot.style.display = 'flex';
+                // Scroll to bottom when opening
+                setTimeout(() => {
+                    const messages = document.getElementById('chatbot-messages');
+                    messages.scrollTop = messages.scrollHeight;
+                }, 100);
+            }
+        }
+
+        function sendChatbotMessage() {
+            const input = document.getElementById('chatbot-user-input');
+            const message = input.value.trim();
+
+            if (message) {
+                addMessage(message, 'user');
+                input.value = '';
+
+                // Simulate bot response after a short delay
+                setTimeout(() => {
+                    const botResponse = generateBotResponse(message);
+                    addMessage(botResponse, 'bot');
+                }, 800);
+            }
+        }
+
+        function sendQuickQuestion(question) {
+            addMessage(question, 'user');
+
+            // Simulate bot response after a short delay
+            setTimeout(() => {
+                const botResponse = generateBotResponse(question);
+                addMessage(botResponse, 'bot');
+            }, 800);
+        }
+
+        function handleChatbotInput(event) {
+            if (event.key === 'Enter') {
+                sendChatbotMessage();
+            }
+        }
+
+        function addMessage(text, sender) {
+            const messages = document.getElementById('chatbot-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message', sender + '-message');
+            messageDiv.innerHTML = text;
+            messages.appendChild(messageDiv);
+
+            // Scroll to bottom
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function generateBotResponse(userMessage) {
+            // Simple response logic - in a real app, you'd connect to a chatbot API
+            const lowerMessage = userMessage.toLowerCase();
+
+            if (lowerMessage.includes('lost') || lowerMessage.includes('report lost')) {
+                return `To report a lost item:<br>
+      1. Click on "Report Lost Item" at the top of the page<br>
+      2. Fill in the details about your lost item<br>
+      3. Submit the form<br><br>
+      You can also <a href="#" onclick="checkLoginBeforeAction('lost')">click here</a> to start the process.`;
+            }
+            else if (lowerMessage.includes('found') || lowerMessage.includes('report found')) {
+                return `To report a found item:<br>
+      1. Click on "Report Found Item" at the top of the page<br>
+      2. Fill in the details about the item you found<br>
+      3. Submit the form<br><br>
+      You can also <a href="#" onclick="checkLoginBeforeAction('found')">click here</a> to start the process.`;
+            }
+            else if (lowerMessage.includes('common') || lowerMessage.includes('items')) {
+                return `The most commonly lost items at UMT are:<br>
+      - Mobile phones<br>
+      - Laptops and tablets<br>
+      - Wallets and purses<br>
+      - Keys (dorm, car, etc.)<br>
+      - Textbooks and notebooks<br>
+      - Water bottles and lunch boxes<br><br>
+      Consider labeling your items with your contact info!`;
+            }
+            else if (lowerMessage.includes('contact') || lowerMessage.includes('help')) {
+                return `You can contact the UMT Lost & Found team at:<br>
+      - Email: lostandfound@umt.edu.pk<br>
+      - Phone: (042) 111-868-911<br>
+      - Location: Student Services Center, Room 205<br><br>
+      Our office hours are Monday-Friday, 9AM-5PM.`;
+            }
+            else {
+                return `I'm the UMT Belongings Assistant. I can help you with:<br>
+      - Reporting lost items<br>
+      - Reporting found items<br>
+      - Information about common lost items<br>
+      - Contacting the lost & found office<br><br>
+      Try asking about one of these topics!`;
+            }
+        }
+
+        // Initialize chatbot with welcome message
+        document.addEventListener('DOMContentLoaded', function () {
+            // You might want to delay the welcome message in a real implementation
+        });
+
+
+
+
+        // Enhanced Image Similarity Search for Lost and Found System
+function initImageSimilarity(uploadInputId, previewId, resultsId) {
+    // Check for required dependencies
+    function checkDependencies() {
+        if (typeof Swal === 'undefined') {
+            console.error('SweetAlert2 is not loaded.');
+            alert('Error: SweetAlert2 library is required.');
+            return false;
+        }
+        if (typeof bootstrap === 'undefined') {
+            console.error('Bootstrap is not loaded.');
+            alert('Error: Bootstrap library is required for modals.');
+            return false;
+        }
+        return true;
+    }
+
+    if (!checkDependencies()) return;
+
+    // Get DOM elements
+    const uploadInput = document.getElementById(uploadInputId);
+    const previewImg = document.getElementById(previewId);
+    const resultsContainer = document.getElementById(resultsId);
+
+    // Validate DOM elements
+    if (!uploadInput || !previewImg || !resultsContainer) {
+        console.error('Missing elements:', {
+            uploadInput: !!uploadInput,
+            previewImg: !!previewImg,
+            resultsContainer: !!resultsContainer
+        });
+        alert('Error: Required elements not found. Check console for details.');
+        return;
+    }
+
+    // Database of found items
+    const foundItemsDatabase = [
+        {
+            id: 1,
+            title: 'notebook',
+            description: 'Found near the library entrance',
+            image: 'public/images/notebook.jpg',
+            location: 'Library',
+            date: '2025-05-28',
+            category: 'Bags & Backpacks',
+            contact: 'lostandfound@umt.edu.pk',
+            status: 'unclaimed'
+        },
+        {
+            id: 2,
+            title: 'Keys',
+            description: 'MacBook Pro found in lecture hall',
+            image: 'public/images/keys.jpg',
+            location: 'Lecture Hall B',
+            date: '2025-05-29',
+            category: 'Electronics',
+            contact: 'it-services@umt.edu.pk',
+            status: 'unclaimed'
+        },
+        {
+            id: 3,
+            title: 'Green Water Bottle',
+            description: 'Hydro Flask with stickers found in cafeteria',
+            image: 'public/images/hydroflask (3).jpg',
+            location: 'Cafeteria',
+            date: '2025-05-30',
+            category: 'Other',
+            contact: 'student-services@umt.edu.pk',
+            status: 'unclaimed'
+        }
+    ];
+
+    // Load user upload history from localStorage
+    let userUploadHistory = JSON.parse(localStorage.getItem('userUploadHistory')) || [];
+
+    // Handle image upload
+    async function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            Swal.fire({
+                title: 'Invalid File',
+                text: 'Please upload a valid image file.',
+                icon: 'error'
+            });
+            return;
+        }
+
+        // Display preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            previewImg.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+
+        // Generate unique image ID
+        const imageId = await createImageId(file);
+
+        // Check for previous uploads
+        const previousUpload = userUploadHistory.find(upload => upload.imageId === imageId);
+        if (previousUpload) {
+            showPreviousUploadAlert(previousUpload);
+        } else {
+            processNewImageUpload(file, imageId);
+        }
+    }
+
+    // Generate unique image ID
+    async function createImageId(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const arrayBuffer = e.target.result;
+                const uint8Array = new Uint8Array(arrayBuffer.slice(0, 100));
+                const byteString = Array.from(uint8Array).join('');
+                resolve(`${file.name}-${file.size}-${byteString}`);
+            };
+            reader.readAsArrayBuffer(file.slice(0, 100));
+        });
+    }
+
+    // Show alert for previously uploaded image
+    function showPreviousUploadAlert(previousUpload) {
+        Swal.fire({
+            title: 'Previously Uploaded Image',
+            html: `You've uploaded this image before on ${new Date(previousUpload.timestamp).toLocaleString()}.<br><br>
+                   <strong>Is this the item you lost?</strong><br>
+                   <img src="${previousUpload.previewUrl}" style="max-width: 200px; max-height: 200px; margin: 10px auto; display: block; border-radius: 5px;">`,
+            imageUrl: previousUpload.matchedItem?.image,
+            imageWidth: 200,
+            imageAlt: 'Matched item',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, show matches again',
+            cancelButtonText: 'No, search again',
+            footer: previousUpload.matchedItem ? 
+                `Previously matched with: ${previousUpload.matchedItem.title}` : 
+                'No matches found last time'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                displaySearchResults(previousUpload.matchedItems || []);
+                if (previousUpload.matchedItem) {
+                    Swal.fire({
+                        title: 'Is this your item?',
+                        html: `<img src="${previousUpload.matchedItem.image}" style="max-width: 300px; margin: 0 auto; display: block; border-radius: 5px;">
+                               <h4>${previousUpload.matchedItem.title}</h4>
+                               <p>${previousUpload.matchedItem.description}</p>
+                               <p><strong>Found at:</strong> ${previousUpload.matchedItem.location}</p>
+                               <p><strong>Date found:</strong> ${previousUpload.matchedItem.date}</p>`,
+                        confirmButtonText: 'Yes, claim this item',
+                        showCancelButton: true,
+                        cancelButtonText: 'No, show all matches'
+                    }).then((claimResult) => {
+                        if (claimResult.isConfirmed) {
+                            initiateClaimProcess(previousUpload.matchedItem);
+                        }
+                    });
+                }
+            } else {
+                findSimilarItems(true);
+            }
+        });
+    }
+
+    // Process new image upload
+    async function processNewImageUpload(file, imageId) {
+        // Create preview URL
+        const previewUrl = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(file);
+        });
+
+        // Find similar items
+        const { matchedItems, bestMatch } = await findSimilarItems(false);
+
+        // Store upload info
+        const uploadRecord = {
+            imageId,
+            previewUrl,
+            timestamp: new Date().toISOString(),
+            matchedItems,
+            matchedItem: bestMatch
+        };
+
+        // Save to history
+        userUploadHistory.push(uploadRecord);
+        localStorage.setItem('userUploadHistory', JSON.stringify(userUploadHistory));
+
+        // Display results
+        displaySearchResults(matchedItems);
+
+        // Prompt for best match
+        if (bestMatch) {
+            Swal.fire({
+                title: 'Is this your item?',
+                html: `<img src="${bestMatch.image}" style="max-width: 300px; margin: 0 auto; display: block; border-radius: 5px;">
+                       <h4>${bestMatch.title}</h4>
+                       <p>${bestMatch.description}</p>
+                       <p><strong>Found at:</strong> ${bestMatch.location}</p>
+                       <p><strong>Date found:</strong> ${bestMatch.date}</p>`,
+                confirmButtonText: 'Yes, claim this item',
+                showCancelButton: true,
+                cancelButtonText: 'No, show all matches'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    initiateClaimProcess(bestMatch);
+                }
+            });
+        }
+    }
+
+    // Find similar items (simulated)
+    async function findSimilarItems(isRepeatSearch) {
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Simulate image similarity comparison
+        const matchedItems = [...foundItemsDatabase].sort(() => 0.5 - Math.random()).slice(0, 3);
+        const bestMatch = matchedItems[0];
+
+        // Display results only if not a repeat search
+        if (!isRepeatSearch) {
+            displaySearchResults(matchedItems);
+        }
+
+        return { matchedItems, bestMatch };
+    }
+
+    // Display search results in DOM
+    function displaySearchResults(items) {
+        resultsContainer.innerHTML = '';
+
+        if (items.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No similar items found in our database. Check back later or try a different photo.
+                </div>
+            `;
+            return;
+        }
+
+        resultsContainer.innerHTML = '<h4>Potential Matches</h4>';
+
+        items.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'similar-item mb-4 p-3 border rounded';
+            itemElement.style.cursor = 'pointer';
+            itemElement.innerHTML = `
+                <div class="row">
+                    <div class="col-md-3">
+                        <img src="${item.image}" class="img-fluid rounded" alt="${item.title}">
+                    </div>
+                    <div class="col-md-9">
+                        <h5>${item.title}</h5>
+                        <p>${item.description}</p>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <small class="text-muted"><i class="fas fa-map-marker-alt"></i> ${item.location}</small>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted"><i class="far fa-calendar-alt"></i> ${item.date}</small>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted"><i class="fas fa-tag"></i> ${item.category}</small>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-primary mt-2 claim-btn" data-id="${item.id}">
+                            <i class="fas fa-handshake"></i> Claim This Item
+                        </button>
+                    </div>
+                </div>
+            `;
+            resultsContainer.appendChild(itemElement);
+        });
+
+        // Add event listeners to claim buttons
+        document.querySelectorAll('.claim-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const itemId = btn.getAttribute('data-id');
+                const item = foundItemsDatabase.find(i => i.id == itemId);
+                if (item) initiateClaimProcess(item);
+            });
+        });
+
+        // Add click event to whole items
+        document.querySelectorAll('.similar-item').forEach(itemEl => {
+            itemEl.addEventListener('click', () => {
+                const itemId = itemEl.querySelector('.claim-btn').getAttribute('data-id');
+                const item = foundItemsDatabase.find(i => i.id == itemId);
+                if (item) viewItemDetails(item);
+            });
+        });
+    }
+
+    // View item details in a modal
+    function viewItemDetails(item) {
+        Swal.fire({
+            title: item.title,
+            html: `
+                <div class="text-center mb-3">
+                    <img src="${item.image}" class="img-fluid rounded" style="max-height: 300px;">
+                </div>
+                <p>${item.description}</p>
+                <div class="row text-center mt-3">
+                    <div class="col-md-4">
+                        <p><i class="fas fa-map-marker-alt"></i> <strong>Location:</strong><br>${item.location}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><i class="far fa-calendar-alt"></i> <strong>Date Found:</strong><br>${item.date}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><i class="fas fa-tag"></i> <strong>Category:</strong><br>${item.category}</p>
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Claim This Item',
+            cancelButtonText: 'Close'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                initiateClaimProcess(item);
+            }
+        });
+    }
+
+    // Initiate claim process
+    function initiateClaimProcess(item) {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (!currentUser) {
+            Swal.fire({
+                title: 'Login Required',
+                text: 'You need to be logged in to claim this item.',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Sign In',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const loginModal = new bootstrap.Modal(document.getElementById('loginTypeModal'));
+                    loginModal.show();
+                }
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Claim Item',
+            html: `You're claiming: <strong>${item.title}</strong><br><br>
+                   <p>Contact information: ${item.contact}</p>
+                   <p>We'll send your contact details to the finder.</p>`,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Confirm Claim',
+            cancelButtonText: 'Cancel',
+            input: 'textarea',
+            inputLabel: 'Additional Information (Optional)',
+            inputPlaceholder: 'Provide any additional details to help verify your ownership...'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Claim Submitted!',
+                    html: `Your claim for <strong>${item.title}</strong> has been submitted.<br><br>
+                           The finder will contact you at <strong>${currentUser.email}</strong>.<br><br>
+                           <p>Reference #: ${Math.floor(100000 + Math.random() * 900000)}</p>`,
+                    icon: 'success'
+                });
+
+                // Update item status (simulated)
+                item.status = 'claimed';
+                item.claimedBy = currentUser.email;
+                item.claimDate = new Date().toISOString();
+            }
+        });
+    }
+
+    // Initialize event listener
+    uploadInput.addEventListener('change', handleImageUpload);
+
+    console.log('Enhanced image similarity initialized');
+}
+
+// Make function available globally
+window.initImageSimilarity = initImageSimilarity;
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Found Item | University Lost & Found</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #48A6A7;
+            --secondary-color: #9ACBD0;
+            --accent-color: #006A71;
+            --light-color: #F2EFE7;
+            --dark-color: #006A71;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #F2EFE7, #9ACBD0);
+            padding-top: 80px;
+        }
+        
+        /* Navigation Bar */
+        .navbar {
+            height: 80px;
+            padding: 0 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: #000000 !important;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: #ffffff;
+        }
+        
+        .navbar-brand:hover {
+            color: #48A6A7;
+        }
+        
+        /* Hero Section Styles */
+        .hero-section {
+            position: relative;
+            padding: 5rem 0;
+            overflow: hidden;
+            margin-top: -20px;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #333;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            animation: fadeInDown 1s ease-out;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #555;
+            margin-top: 1rem;
+            animation: fadeInUp 1s ease-out 0.3s;
+            animation-fill-mode: both;
+        }
+        
+        .hero-icon {
+            font-size: 6rem;
+            color: var(--primary-color);
+            opacity: 0.2;
+            animation: float 4s infinite ease-in-out;
+        }
+        
+        /* Animations for Hero Section */
+        @keyframes fadeInDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0); }
+        }
+        
+        /* Form Styles */
+        .report-form {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+        }
+        
+        .form-header h2 {
+            font-weight: 700;
+        }
+        
+        .form-header .icon {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .image-upload-container {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 1.5rem;
+        }
+        
+        .image-upload-container:hover {
+            border-color: var(--secondary-color);
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        .image-upload-container i {
+            font-size: 3rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 1rem;
+            display: none;
+            border-radius: 8px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar {
+                height: auto;
+                padding: 0.5rem 1rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .report-form {
+                padding: 1.5rem;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            
+            .hero-icon {
+                font-size: 4rem;
+            }
+        }
+
+        .hover-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+        .form-floating > label {
+            padding-left: 1.5rem;
+        }
+        .form-floating > .form-control {
+            padding-left: 1.5rem;
+        }
+        .badge {
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .card {
+            border: 2px solid var(--accent-color);
+            border-radius: 15px;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+            background: var(--light-color);
+            transition: all 0.4s ease;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            transform: scale(1.1);
+        }
+
+        .card-img-top {
+            border-radius: 10px 10px 0 0;
+            animation: float 3s infinite ease-in-out;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .card-title {
+            color: var(--dark-color) !important;
+            text-shadow: none;
+        }
+
+        .card-footer {
+            background: transparent !important;
+            border-top: none !important;
+            padding: 1rem !important;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem !important;
+            font-size: 0.875rem !important;
+            width: 100% !important;
+        }
+
+        .search-box {
+            border-radius: 25px;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .no-items-found {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-search-location me-2"></i>UniLost & Found
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="lost.html">Lost Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="found.html">Found Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About</a>
+                    </li>
+                </ul>
+                
+                <!-- Logged Out State -->
+                <div class="auth-buttons" id="loggedOutNav">
+                    <button class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#loginTypeModal">
+                        <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                    </button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#signupModal">
+                        <i class="fas fa-user-plus me-1"></i>Sign Up
+                    </button>
+                </div>
+
+                <!-- Logged In State (Default hidden) -->
+                <div class="auth-buttons" id="loggedInNav" style="display: none;">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="userFullName">User Name</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="dashboard.html"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                            <li><a class="dropdown-item" href="my-posts.html"><i class="fas fa-list me-2"></i>My Posts</a></li>
+                            <li><a class="dropdown-item" href="my-requests.html"><i class="fas fa-handshake me-2"></i>My Requests</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a href="#" class="dropdown-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 hero-content">
+                    <h1 class="hero-title">Found Items</h1>
+                    <p class="hero-subtitle lead">Browse through items found on campus or report a new found item to help others reconnect with their belongings.</p>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <i class="fas fa-search hero-icon"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search Section -->
+    <div class="container mt-4">
+        <div class="card shadow-sm border-0 rounded-3 mb-5">
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="searchInput" placeholder="Enter product name...">
+                            <label for="searchInput"><i class="fas fa-search me-2"></i>Enter product name...</label>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-floating">
+                            <select class="form-select" id="locationFilter">
+                                <option value="">All Locations</option>
+                                <option>Main Library</option>
+                                <option>Science Building</option>
+                                <option>Student Center</option>
+                                <option>Sports Complex</option>
+                                <option>Cafeteria</option>
+                            </select>
+                            <label for="locationFilter"><i class="fas fa-map-marker-alt me-2"></i>Select Location</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button onclick="searchItems()" class="btn btn-primary h-100 w-100">
+                            <i class="fas fa-search me-2"></i>Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container py-4">
+        <!-- Found Items Grid -->
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <img src="public/images/keys.jpg"
+                        class="card-img-top" alt="Found Keys">
+                    <div class="card-body">
+                        <h5 class="card-title">Set of Keys</h5>
+                        <p class="card-text"><i class="fas fa-map-marker-alt me-2"
+                                style="color: var(--accent-color);"></i>Cafeteria</p>
+                        <p class="card-text"><i class="far fa-calendar-alt me-2"
+                                style="color: var(--accent-color);"></i>May 28, 2025</p>
+                        <p class="card-text">Found on table near the entrance. Includes car key and dorm key.</p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i class="fas fa-user me-1"></i>Posted by: Hassan Raza
+                            </small>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <button class="btn btn-primary w-100" onclick="handleItemAction('1')">
+                            <i class="fas fa-hand-holding-heart me-2"></i>This is Mine
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <img src="public/images/headphones.jpg"
+                        class="card-img-top" alt="Found Headphones">
+                    <div class="card-body">
+                        <h5 class="card-title">Wireless Headphones</h5>
+                        <p class="card-text"><i class="fas fa-map-marker-alt me-2"
+                                style="color: var(--accent-color);"></i>Sports Complex</p>
+                        <p class="card-text"><i class="far fa-calendar-alt me-2"
+                                style="color: var(--accent-color);"></i>May 29, 2025</p>
+                        <p class="card-text">Black Sony headphones found in locker room.</p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i class="fas fa-user me-1"></i>Posted by: Zainab Khan
+                            </small>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <button class="btn btn-primary w-100" onclick="handleItemAction('2')">
+                            <i class="fas fa-hand-holding-heart me-2"></i>This is Mine
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <img src="public/images/hydroflask.jpg"
+                        class="card-img-top" alt="Found Water Bottle">
+                    <div class="card-body">
+                        <h5 class="card-title">Hydro Flask</h5>
+                        <p class="card-text"><i class="fas fa-map-marker-alt me-2"
+                                style="color: var(--accent-color);"></i>Math Building</p>
+                        <p class="card-text"><i class="far fa-calendar-alt me-2"
+                                style="color: var(--accent-color);"></i>May 30, 2025</p>
+                        <p class="card-text">Blue 32oz Hydro Flask with stickers on it.</p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i class="fas fa-user me-1"></i>Posted by: Usman Ali
+                            </small>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <button class="btn btn-primary w-100" onclick="handleItemAction('3')">
+                            <i class="fas fa-hand-holding-heart me-2"></i>This is Mine
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Found Item Button -->
+        <div class="text-center mt-5">
+            <button class="btn btn-lg px-5 py-3" onclick="reportFoundItem()" 
+               style="background: var(--primary-color); color: white; border-radius: 30px; min-width: 250px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <i class="fas fa-plus-circle me-2"></i>Report Found Item
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>About UniLost & Found</h5>
+                    <p>A platform dedicated to helping university students recover their lost belongings and return found items to their rightful owners.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="index.html" class="text-white">Home</a></li>
+                        <li><a href="lost.html" class="text-white">Lost Items</a></li>
+                        <li><a href="found.html" class="text-white">Found Items</a></li>
+                        <li><a href="about.html" class="text-white">About</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-envelope me-2"></i>lostandfound@university.edu</li>
+                        <li><i class="fas fa-phone me-2"></i>(123) 456-7890</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p class="mb-0">© 2023 University Lost & Found System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Type Modal -->
+    <div class="modal fade" id="loginTypeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sign In As</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <button class="btn btn-primary w-100 py-3" onclick="openStudentLogin()">
+                                <i class="fas fa-user-graduate fa-2x mb-2"></i><br>
+                                <h4>Student</h4>
+                                <p class="mb-0">Sign in with university credentials</p>
+                            </button>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <button class="btn btn-secondary w-100 py-3" onclick="openAdminLogin()">
+                                <i class="fas fa-user-shield fa-2x mb-2"></i><br>
+                                <h4>Administrator</h4>
+                                <p class="mb-0">Sign in with admin credentials</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <p>Don't have an account? <a href="#" onclick="openSignup()">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Student Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="studentLoginForm">
+                        <div class="mb-3">
+                            <label for="loginEmail" class="form-label">University Email</label>
+                            <input type="email" class="form-control" id="loginEmail" placeholder="name@umt.edu.pk" required>
+                            <small class="text-danger" id="loginEmailError"></small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="loginPassword" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('loginPassword', 'loginPasswordToggle')">
+                                    <i class="fas fa-eye" id="loginPasswordToggle"></i>
+                                </button>
+                            </div>
+                            <small class="text-danger" id="loginPasswordError"></small>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">Remember me</label>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100" onclick="handleStudentLogin()">Login</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal" data-bs-dismiss="modal">Forgot password?</a>
+                    </div>
+                    <hr>
+                    <p class="text-center">Don't have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#signupModal" data-bs-dismiss="modal">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="modal fade" id="adminLoginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Admin Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="adminLoginForm" onsubmit="return validateAdminLogin(event)">
+                        <div class="mb-3">
+                            <label for="adminEmail" class="form-label">Admin Email</label>
+                            <input type="email" class="form-control" id="adminEmail" placeholder="admin@umt.edu.pk">
+                            <small class="text-danger" id="adminEmailError"></small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adminPassword" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="adminPassword">
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('adminPassword', 'adminPasswordToggle')">
+                                    <i class="fas fa-eye" id="adminPasswordToggle"></i>
+                                </button>
+                            </div>
+                            <small class="text-danger" id="adminPasswordError"></small>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="adminRememberMe">
+                            <label class="form-check-label" for="adminRememberMe">Remember me</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login as Admin</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal fade" id="signupModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Your Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="signupForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="signupFirstName" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="signupFirstName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="signupLastName" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="signupLastName" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signupEmail" class="form-label">University Email</label>
+                            <input type="email" class="form-control" id="signupEmail" placeholder="name@umt.edu.pk" required>
+                            <small class="text-danger" id="signupEmailError"></small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signupPassword" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="signupPassword" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('signupPassword', 'signupPasswordToggle')">
+                                    <i class="fas fa-eye" id="signupPasswordToggle"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength mt-2">
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar" id="passwordStrength" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="text-muted" id="passwordStrengthText">Password strength: None</small>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signupConfirmPassword" class="form-label">Confirm Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="signupConfirmPassword" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('signupConfirmPassword', 'confirmPasswordToggle')">
+                                    <i class="fas fa-eye" id="confirmPasswordToggle"></i>
+                                </button>
+                            </div>
+                            <small class="text-danger" id="passwordMatchError"></small>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                            <label class="form-check-label" for="agreeTerms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100" onclick="handleSignup()">Create Account</button>
+                    </form>
+                    <hr>
+                    <p class="text-center">Already have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reset Your Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="forgotEmail" class="form-label">University Email</label>
+                            <input type="email" class="form-control" id="forgotEmail" placeholder="name@umt.edu.pk">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Send Reset Link</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">Back to login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Alert Modal for Login Required -->
+    <div class="modal fade custom-alert-modal" id="loginRequiredModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-circle me-2"></i>Login Required
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="mb-4">
+                        <i class="fas fa-user-lock fa-4x text-primary mb-3"></i>
+                        <h4 class="mb-3">Please Sign In First</h4>
+                        <p class="text-muted mb-0">You need to be logged in to perform this action.</p>
+                        <p class="text-muted">Please sign in or create an account to continue.</p>
+                    </div>
+                    <div class="d-grid gap-2 col-md-8 mx-auto">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginTypeModal" data-bs-dismiss="modal">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </button>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#signupModal" data-bs-dismiss="modal">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Notification Modal -->
+    <div class="modal fade custom-alert-modal" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle me-2"></i>Success
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                        <h4 class="mb-3" id="successTitle">Operation Successful</h4>
+                        <p class="text-muted mb-0" id="successMessage">Your action has been completed successfully.</p>
+                    </div>
+                    <button class="btn btn-success px-4" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Notification Modal -->
+    <div class="modal fade custom-alert-modal" id="errorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Error
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="mb-4">
+                        <i class="fas fa-exclamation-triangle fa-4x text-danger mb-3"></i>
+                        <h4 class="mb-3" id="errorTitle">Operation Failed</h4>
+                        <p class="text-muted mb-0" id="errorMessage">An error occurred while processing your request.</p>
+                    </div>
+                    <button class="btn btn-danger px-4" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Notification Modal -->
+    <div class="modal fade custom-alert-modal" id="infoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-info-circle me-2"></i>Information
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="mb-4">
+                        <i class="fas fa-info-circle fa-4x text-info mb-3"></i>
+                        <h4 class="mb-3" id="infoTitle">Information</h4>
+                        <p class="text-muted mb-0" id="infoMessage">Here's some important information for you.</p>
+                    </div>
+                    <button class="btn btn-info px-4 text-white" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>Got It
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <script>
+        // Initialize registeredUsers array from localStorage
+        let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+
+        // Handle logout function
+        function handleLogout() {
+            localStorage.removeItem('currentUser');
+            
+            Swal.fire({
+                title: 'Logged Out Successfully',
+                text: 'You have been logged out of your account',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Update UI for logged in user
+        function updateUIForLoggedInUser(user) {
+            document.getElementById('loggedOutNav').style.display = 'none';
+            document.getElementById('loggedInNav').style.display = 'block';
+            document.getElementById('userFullName').textContent = `${user.firstName} ${user.lastName}`;
+        }
+
+        // Handle signup function
+        function handleSignup() {
+            const firstName = document.getElementById('signupFirstName').value;
+            const lastName = document.getElementById('signupLastName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+            const agreeTerms = document.getElementById('agreeTerms').checked;
+            
+            // Reset error messages
+            document.getElementById('signupEmailError').textContent = '';
+            document.getElementById('passwordMatchError').textContent = '';
+
+            // Validate email domain
+            if (!validateUMTEmail(email)) {
+                document.getElementById('signupEmailError').textContent = 'Please use your UMT email address (@umt.edu.pk)';
+                return;
+            }
+
+            // Check if email already exists
+            if (registeredUsers.some(user => user.email === email)) {
+                document.getElementById('signupEmailError').textContent = 'This email is already registered';
+                return;
+            }
+
+            // Validate password match
+            if (password !== confirmPassword) {
+                document.getElementById('passwordMatchError').textContent = 'Passwords do not match';
+                return;
+            }
+
+            // Create user data
+            const userData = {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: password
+            };
+            
+            // Add to registered users array and save to localStorage
+            registeredUsers.push(userData);
+            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+
+            // Show success message
+            Swal.fire({
+                title: 'Account Created Successfully!',
+                text: 'Welcome to UMT Belongings Hub!',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('signupModal'));
+                modal.hide();
+                updateUIForLoggedInUser(userData);
+            });
+        }
+
+        // Student login handler
+        function handleStudentLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const emailError = document.getElementById('loginEmailError');
+            const passwordError = document.getElementById('loginPasswordError');
+
+            // Reset error messages
+            emailError.textContent = '';
+            passwordError.textContent = '';
+
+            // Validate email domain
+            if (!validateUMTEmail(email)) {
+                emailError.textContent = 'Please use your UMT email address (@umt.edu.pk)';
+                return;
+            }
+
+            // Check if user exists
+            const user = registeredUsers.find(u => u.email === email);
+            if (!user) {
+                emailError.textContent = 'Email not found';
+                return;
+            }
+
+            // Validate password
+            if (user.password !== password) {
+                passwordError.textContent = 'Incorrect password';
+                return;
+            }
+
+            // Store current user
+            localStorage.setItem('currentUser', JSON.stringify(user));
+
+            // Show success message
+            Swal.fire({
+                title: 'Login Successful!',
+                text: 'Welcome back to UMT Belongings Hub!',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+                loginModal.hide();
+                updateUIForLoggedInUser(user);
+            });
+        }
+
+        // Admin login validation
+        function validateAdminLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const emailError = document.getElementById('adminEmailError');
+            const passwordError = document.getElementById('adminPasswordError');
+
+            // Reset error messages
+            emailError.textContent = '';
+            passwordError.textContent = '';
+
+            if (email !== 'admin@umt.edu.pk') {
+                emailError.textContent = 'Invalid admin email';
+                return false;
+            }
+
+            if (password !== 'Admin@UMT2024') {
+                passwordError.textContent = 'Invalid admin password';
+                return false;
+            }
+
+            // Store admin session
+            const adminData = {
+                firstName: 'Admin',
+                lastName: 'User',
+                email: email,
+                isAdmin: true
+            };
+            
+            localStorage.setItem('currentUser', JSON.stringify(adminData));
+
+            // Show success message
+            Swal.fire({
+                title: 'Admin Login Successful!',
+                text: 'Welcome to Admin Dashboard!',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = 'admin.html';
+            });
+
+            return false;
+        }
+
+        // Email validation function
+        function validateUMTEmail(email) {
+            return email.toLowerCase().endsWith('@umt.edu.pk');
+        }
+
+        // Password visibility toggle
+        function togglePasswordVisibility(inputId, toggleId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(toggleId);
+            
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                toggleIcon.classList.remove("fa-eye");
+                toggleIcon.classList.add("fa-eye-slash");
+            } else {
+                passwordInput.type = "password";
+                toggleIcon.classList.remove("fa-eye-slash");
+                toggleIcon.classList.add("fa-eye");
+            }
+        }
+
+        // Check password strength
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            const progressBar = document.getElementById('passwordStrength');
+            const strengthText = document.getElementById('passwordStrengthText');
+
+            if (password.length >= 8) strength += 25;
+            if (password.match(/[A-Z]/)) strength += 25;
+            if (password.match(/[0-9]/)) strength += 25;
+            if (password.match(/[!@#$%^&*]/)) strength += 25;
+
+            progressBar.style.width = strength + '%';
+            
+            if (strength < 50) {
+                progressBar.className = 'progress-bar bg-danger';
+                strengthText.textContent = 'Password strength: Weak';
+            } else if (strength < 75) {
+                progressBar.className = 'progress-bar bg-warning';
+                strengthText.textContent = 'Password strength: Medium';
+            } else {
+                progressBar.className = 'progress-bar bg-success';
+                strengthText.textContent = 'Password strength: Strong';
+            }
+
+            return strength;
+        }
+
+        // Modal handling functions
+        function openStudentLogin() {
+            const loginTypeModal = bootstrap.Modal.getInstance(document.getElementById('loginTypeModal'));
+            loginTypeModal.hide();
+            setTimeout(() => {
+                const studentLoginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                studentLoginModal.show();
+            }, 500);
+        }
+
+        function openAdminLogin() {
+            const loginTypeModal = bootstrap.Modal.getInstance(document.getElementById('loginTypeModal'));
+            loginTypeModal.hide();
+            setTimeout(() => {
+                const adminLoginModal = new bootstrap.Modal(document.getElementById('adminLoginModal'));
+                adminLoginModal.show();
+            }, 500);
+        }
+
+        function openSignup() {
+            const loginTypeModal = bootstrap.Modal.getInstance(document.getElementById('loginTypeModal'));
+            loginTypeModal.hide();
+            setTimeout(() => {
+                const signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
+                signupModal.show();
+            }, 500);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for existing session
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                updateUIForLoggedInUser(JSON.parse(currentUser));
+            }
+
+            // Add password strength check on input
+            const signupPassword = document.getElementById('signupPassword');
+            if (signupPassword) {
+                signupPassword.addEventListener('input', function() {
+                    checkPasswordStrength(this.value);
+                });
+            }
+        });
+
+        // Image upload preview functionality
+        const imageUploadContainer = document.getElementById('imageUploadContainer');
+        const itemImages = document.getElementById('itemImages');
+        const imagePreview = document.getElementById('imagePreview');
+
+        imageUploadContainer.addEventListener('click', () => itemImages.click());
+
+        itemImages.addEventListener('change', function(e) {
+            if (e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // Load found items from index.html
+        function loadFoundItems() {
+            const foundItems = JSON.parse(localStorage.getItem('foundItems')) || [];
+            const container = document.querySelector('.row.g-4');
+            
+            if (foundItems.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="no-items-found">
+                            <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+                            <h3>No Found Items Reported</h3>
+                            <p class="text-muted">Be the first to report a found item!</p>
+                            <button class="btn btn-primary mt-3" onclick="checkLoginBeforeAction('found')">
+                                <i class="fas fa-plus-circle me-2"></i>Report Found Item
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = foundItems.map(item => `
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="${item.image || 'https://via.placeholder.com/300x200?text=No+Image'}" 
+                            class="card-img-top" alt="${item.title}">
+                        <div class="card-body">
+                            <h5 class="card-title">${item.title}</h5>
+                            <p class="card-text"><i class="fas fa-map-marker-alt me-2"
+                                    style="color: var(--accent-color);"></i>${item.location}</p>
+                            <p class="card-text"><i class="far fa-calendar-alt me-2"
+                                    style="color: var(--accent-color);"></i>${new Date(item.date).toLocaleDateString()}</p>
+                            <p class="card-text">${item.description}</p>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="fas fa-user me-1"></i>Posted by: ${item.posterName}
+                                </small>
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <button class="btn btn-primary w-100" onclick="handleItemAction('${item.id}')">
+                                <i class="fas fa-hand-holding-heart me-2"></i>This is Mine
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add notification helper functions
+        function showNotification(type, title, message) {
+            const modalId = `${type}Modal`;
+            const titleId = `${type}Title`;
+            const messageId = `${type}Message`;
+            
+            const modal = document.getElementById(modalId);
+            const titleElement = document.getElementById(titleId);
+            const messageElement = document.getElementById(messageId);
+            
+            if (titleElement) titleElement.textContent = title;
+            if (messageElement) messageElement.textContent = message;
+            
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        }
+
+        function showSuccess(title, message) {
+            showNotification('success', title, message);
+        }
+
+        function showError(title, message) {
+            showNotification('error', title, message);
+        }
+
+        function showInfo(title, message) {
+            showNotification('info', title, message);
+        }
+
+        // Update handleItemAction function
+        function handleItemAction(itemId) {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                const loginRequiredModal = new bootstrap.Modal(document.getElementById('loginRequiredModal'));
+                loginRequiredModal.show();
+                return;
+            }
+
+            try {
+                // Process the action
+                showSuccess('Success', 'Your request has been processed successfully.');
+                setTimeout(() => {
+                    window.location.href = 'my-requests.html';
+                }, 2000);
+            } catch (error) {
+                showError('Error', 'Failed to process your request. Please try again.');
+            }
+        }
+
+        // Update reportFoundItem function
+        function reportFoundItem() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                const loginRequiredModal = new bootstrap.Modal(document.getElementById('loginRequiredModal'));
+                loginRequiredModal.show();
+                return;
+            }
+
+            showInfo('Coming Soon', 'The report form will be available shortly.');
+        }
+
+        // Load found items when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication and update UI
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                document.getElementById('userFullName').textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+                document.getElementById('loggedInNav').style.display = 'block';
+                document.getElementById('loggedOutNav').style.display = 'none';
+
+                // Pre-fill the form with user information
+                document.getElementById('finderName').value = `${currentUser.firstName} ${currentUser.lastName}`;
+                document.getElementById('finderEmail').value = currentUser.email;
+            } else {
+                document.getElementById('loggedInNav').style.display = 'none';
+                document.getElementById('loggedOutNav').style.display = 'block';
+            }
+
+            // Load and display found items
+            loadFoundItems();
+        });
+
+        // Simple search function that will definitely work
+        function searchItems() {
+            // Get search values
+            const searchInput = document.getElementById('searchInput');
+            const locationFilter = document.getElementById('locationFilter');
+            
+            const searchText = searchInput.value.toLowerCase().trim();
+            const locationText = locationFilter.value.toLowerCase().trim();
+            
+            // Get all cards
+            const allCards = document.querySelectorAll('.col-md-4');
+            let foundMatch = false;
+            
+            // Loop through each card
+            allCards.forEach(cardCol => {
+                const card = cardCol.querySelector('.card');
+                const title = card.querySelector('.card-title').textContent.toLowerCase();
+                const location = card.querySelector('.fa-map-marker-alt').parentElement.textContent.toLowerCase();
+                
+                // Check if card matches search criteria
+                const matchesTitle = searchText === '' || title.includes(searchText);
+                const matchesLocation = locationText === '' || location.includes(locationText);
+                
+                // Show/hide based on matches
+                if (matchesTitle && matchesLocation) {
+                    cardCol.style.display = '';
+                    foundMatch = true;
+                } else {
+                    cardCol.style.display = 'none';
+                }
+            });
+            
+            // Show/hide no results message
+            const noResults = document.querySelector('.no-results-message');
+            if (noResults) {
+                noResults.remove();
+            }
+            
+            if (!foundMatch) {
+                const container = document.querySelector('.row.g-4');
+                const noResultsDiv = document.createElement('div');
+                noResultsDiv.className = 'col-12 text-center py-5 no-results-message';
+                noResultsDiv.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-search fa-3x mb-3 d-block"></i>
+                        <h4>No Items Found</h4>
+                        <p class="mb-0">No items match your search criteria</p>
+                        <button class="btn btn-outline-primary mt-3" onclick="clearSearch()">
+                            <i class="fas fa-undo me-2"></i>Clear Search
+                        </button>
+                    </div>
+                `;
+                container.appendChild(noResultsDiv);
+            }
+        }
+
+        // Clear search function
+        function clearSearch() {
+            // Clear input fields
+            document.getElementById('searchInput').value = '';
+            document.getElementById('locationFilter').value = '';
+            
+            // Show all cards
+            const allCards = document.querySelectorAll('.col-md-4');
+            allCards.forEach(card => {
+                card.style.display = '';
+            });
+            
+            // Remove no results message if it exists
+            const noResults = document.querySelector('.no-results-message');
+            if (noResults) {
+                noResults.remove();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - UMT Belongings Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #48A6A7;
+            --secondary-color: #9ACBD0;
+            --accent-color: #006A71;
+            --light-color: #F2EFE7;
+            --dark-color: #006A71;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #F2EFE7, #9ACBD0);
+            padding-top: 80px;
+        }
+
+        .navbar {
+            background: var(--dark-color) !important;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .dashboard-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .stat-card {
+            background: var(--light-color);
+            border-left: 5px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .activity-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s ease;
+        }
+
+        .activity-item:hover {
+            background-color: var(--light-color);
+        }
+
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid var(--light-color);
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-color);
+        }
+
+        .nav-pills .nav-link {
+            color: var(--dark-color);
+        }
+
+        .badge-lost {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .badge-found {
+            background-color: #198754;
+            color: white;
+        }
+
+        .badge-pending {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .badge-resolved {
+            background-color: #0dcaf0;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-search-location me-2"></i>UniLost & Found
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="lost.html">Lost Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="found.html">Found Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About</a>
+                    </li>
+                </ul>
+                <div class="auth-buttons" id="loggedInNav">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="userFullName">User Name</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item active" href="dashboard.html"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                            <li><a class="dropdown-item" href="my-posts.html"><i class="fas fa-list me-2"></i>My Posts</a></li>
+                            <li><a class="dropdown-item" href="my-requests.html"><i class="fas fa-handshake me-2"></i>My Requests</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a href="#" class="dropdown-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <!-- Profile Section -->
+            <div class="col-md-4">
+                <div class="dashboard-card">
+                    <div class="dashboard-header text-center">
+                        <img src="https://ui-avatars.com/api/?name=John+Doe&background=random" alt="Profile" class="profile-image mb-3" id="profileImage">
+                        <h4 id="userName">John Doe</h4>
+                        <p class="mb-0" id="userEmail">john.doe@umt.edu.pk</p>
+                    </div>
+                    <div class="p-4">
+                        <h5 class="mb-3">Account Information</h5>
+                        <p><strong>Member Since:</strong> <span id="memberSince">May 30, 2025</span></p>
+                        <p><strong>Last Login:</strong> <span id="lastLogin">2 hours ago</span></p>
+                        <p><strong>Account Type:</strong> <span id="accountType">Student</span></p>
+                        <button class="btn btn-primary w-100" onclick="editProfile()">
+                            <i class="fas fa-edit me-2"></i>Edit Profile
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="dashboard-card">
+                    <div class="p-4">
+                        <h5 class="mb-3">Activity Overview</h5>
+                        <div class="stat-card">
+                            <h6>Lost Items</h6>
+                            <h3 id="lostItemsCount">0</h3>
+                        </div>
+                        <div class="stat-card">
+                            <h6>Found Items</h6>
+                            <h3 id="foundItemsCount">0</h3>
+                        </div>
+                        <div class="stat-card">
+                            <h6>Success Rate</h6>
+                            <h3 id="successRate">0%</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard Content -->
+            <div class="col-md-8">
+                <!-- Navigation Pills -->
+                <ul class="nav nav-pills mb-3" id="dashboardTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#activity">
+                            <i class="fas fa-chart-line me-2"></i>Recent Activity
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#posts">
+                            <i class="fas fa-list me-2"></i>My Posts
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#notifications">
+                            <i class="fas fa-bell me-2"></i>Notifications
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Recent Activity Tab -->
+                    <div class="tab-pane fade show active" id="activity">
+                        <div class="dashboard-card">
+                            <div class="p-4">
+                                <h5 class="mb-4">Recent Activity</h5>
+                                <div id="activityList">
+                                    <!-- Activity items will be dynamically added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- My Posts Tab -->
+                    <div class="tab-pane fade" id="posts">
+                        <div class="dashboard-card">
+                            <div class="p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h5 class="mb-0">My Posts</h5>
+                                    <div class="btn-group">
+                                        <button class="btn btn-outline-primary active" onclick="filterPosts('all')">All</button>
+                                        <button class="btn btn-outline-primary" onclick="filterPosts('lost')">Lost</button>
+                                        <button class="btn btn-outline-primary" onclick="filterPosts('found')">Found</button>
+                                    </div>
+                                </div>
+                                <div id="postsList">
+                                    <!-- Posts will be dynamically added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications Tab -->
+                    <div class="tab-pane fade" id="notifications">
+                        <div class="dashboard-card">
+                            <div class="p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h5 class="mb-0">Notifications</h5>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="markAllAsRead()">
+                                        Mark All as Read
+                                    </button>
+                                </div>
+                                <div id="notificationsList">
+                                    <!-- Notifications will be dynamically added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editProfileForm">
+                        <div class="mb-3">
+                            <label for="editFirstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="editFirstName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="editLastName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editProfileImage" class="form-label">Profile Image URL</label>
+                            <input type="url" class="form-control" id="editProfileImage">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <script>
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Update profile information
+            updateProfileInfo(currentUser);
+            // Load activity data
+            loadActivityData();
+            // Load posts
+            loadUserPosts();
+            // Load notifications
+            loadNotifications();
+        });
+
+        function updateProfileInfo(user) {
+            document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
+            document.getElementById('userFullName').textContent = `${user.firstName} ${user.lastName}`;
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('memberSince').textContent = new Date(user.registrationDate).toLocaleDateString();
+            document.getElementById('lastLogin').textContent = getTimeAgo(new Date(user.lastLogin));
+            document.getElementById('accountType').textContent = user.isAdmin ? 'Administrator' : 'Student';
+            document.getElementById('profileImage').src = user.profileImage || 
+                `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=random`;
+        }
+
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = seconds / 31536000;
+            
+            if (interval > 1) return Math.floor(interval) + " years ago";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + " months ago";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + " days ago";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + " hours ago";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + " minutes ago";
+            return Math.floor(seconds) + " seconds ago";
+        }
+
+        function loadActivityData() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const activities = JSON.parse(localStorage.getItem('userActivities_' + currentUser.email)) || [];
+            const activityList = document.getElementById('activityList');
+            
+            // Update stats
+            const stats = calculateUserStats();
+            document.getElementById('lostItemsCount').textContent = stats.lostItems;
+            document.getElementById('foundItemsCount').textContent = stats.foundItems;
+            document.getElementById('successRate').textContent = stats.successRate + '%';
+
+            // Display activities
+            activityList.innerHTML = activities.length ? activities.map(activity => `
+                <div class="activity-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas ${getActivityIcon(activity.type)} me-2"></i>
+                            <strong>${activity.title}</strong>
+                        </div>
+                        <small class="text-muted">${getTimeAgo(new Date(activity.date))}</small>
+                    </div>
+                    <p class="mb-0 text-muted">${activity.description}</p>
+                </div>
+            `).join('') : '<p class="text-center text-muted">No recent activity</p>';
+        }
+
+        function getActivityIcon(type) {
+            const icons = {
+                'lost': 'fa-search',
+                'found': 'fa-check-circle',
+                'comment': 'fa-comment',
+                'login': 'fa-sign-in-alt'
+            };
+            return icons[type] || 'fa-circle';
+        }
+
+        function calculateUserStats() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const posts = JSON.parse(localStorage.getItem('userPosts_' + currentUser.email)) || [];
+            
+            const lostItems = posts.filter(post => post.type === 'lost').length;
+            const foundItems = posts.filter(post => post.type === 'found').length;
+            const resolvedItems = posts.filter(post => post.status === 'resolved').length;
+            const successRate = posts.length ? Math.round((resolvedItems / posts.length) * 100) : 0;
+
+            return {
+                lostItems,
+                foundItems,
+                successRate
+            };
+        }
+
+        function loadUserPosts() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const posts = JSON.parse(localStorage.getItem('userPosts_' + currentUser.email)) || [];
+            const postsList = document.getElementById('postsList');
+
+            postsList.innerHTML = posts.length ? posts.map(post => `
+                <div class="activity-item" data-post-type="${post.type}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">${post.title}</h6>
+                        <span class="badge ${post.type === 'lost' ? 'badge-lost' : 'badge-found'}">${post.type}</span>
+                    </div>
+                    <p class="text-muted mb-2">${post.description}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">${new Date(post.date).toLocaleDateString()}</small>
+                        <span class="badge ${getStatusBadgeClass(post.status)}">${post.status}</span>
+                    </div>
+                </div>
+            `).join('') : '<p class="text-center text-muted">No posts yet</p>';
+        }
+
+        function getStatusBadgeClass(status) {
+            const classes = {
+                'pending': 'badge-pending',
+                'resolved': 'badge-resolved',
+                'active': 'badge-found'
+            };
+            return classes[status] || 'badge-pending';
+        }
+
+        function loadNotifications() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const notifications = JSON.parse(localStorage.getItem('userNotifications_' + currentUser.email)) || [];
+            const notificationsList = document.getElementById('notificationsList');
+
+            notificationsList.innerHTML = notifications.length ? notifications.map(notification => `
+                <div class="activity-item ${notification.read ? '' : 'bg-light'}" data-notification-id="${notification.id}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas ${getNotificationIcon(notification.type)} me-2"></i>
+                            <strong>${notification.title}</strong>
+                        </div>
+                        <small class="text-muted">${getTimeAgo(new Date(notification.date))}</small>
+                    </div>
+                    <p class="mb-0 text-muted">${notification.message}</p>
+                </div>
+            `).join('') : '<p class="text-center text-muted">No notifications</p>';
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                'match': 'fa-check-circle',
+                'comment': 'fa-comment',
+                'system': 'fa-info-circle'
+            };
+            return icons[type] || 'fa-bell';
+        }
+
+        function editProfile() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            document.getElementById('editFirstName').value = currentUser.firstName;
+            document.getElementById('editLastName').value = currentUser.lastName;
+            document.getElementById('editProfileImage').value = currentUser.profileImage || '';
+
+            const editProfileModal = new bootstrap.Modal(document.getElementById('editProfileModal'));
+            editProfileModal.show();
+
+            document.getElementById('editProfileForm').onsubmit = function(e) {
+                e.preventDefault();
+                
+                const updatedUser = {
+                    ...currentUser,
+                    firstName: document.getElementById('editFirstName').value,
+                    lastName: document.getElementById('editLastName').value,
+                    profileImage: document.getElementById('editProfileImage').value
+                };
+
+                localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+                
+                // Update registered users array
+                const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+                const updatedUsers = registeredUsers.map(user => 
+                    user.email === currentUser.email ? updatedUser : user
+                );
+                localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+
+                // Update UI
+                updateProfileInfo(updatedUser);
+                
+                editProfileModal.hide();
+                
+                Swal.fire({
+                    title: 'Profile Updated',
+                    text: 'Your profile has been updated successfully',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            };
+        }
+
+        function filterPosts(type) {
+            const posts = document.querySelectorAll('[data-post-type]');
+            posts.forEach(post => {
+                if (type === 'all' || post.dataset.postType === type) {
+                    post.style.display = 'block';
+                } else {
+                    post.style.display = 'none';
+                }
+            });
+
+            // Update active button state
+            const buttons = document.querySelectorAll('.btn-group .btn');
+            buttons.forEach(button => button.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function markAllAsRead() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            let notifications = JSON.parse(localStorage.getItem('userNotifications_' + currentUser.email)) || [];
+            
+            notifications = notifications.map(notification => ({
+                ...notification,
+                read: true
+            }));
+
+            localStorage.setItem('userNotifications_' + currentUser.email, JSON.stringify(notifications));
+            loadNotifications();
+
+            Swal.fire({
+                title: 'Notifications Cleared',
+                text: 'All notifications have been marked as read',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+
+        function handleLogout() {
+            Swal.fire({
+                title: 'Logging Out',
+                text: 'You will be redirected to the home page',
+                icon: 'info',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Add some sample data for demonstration
+        function addSampleData() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            // Sample activities
+            const activities = [
+                {
+                    type: 'lost',
+                    title: 'Reported Lost Item',
+                    description: 'Reported a lost wallet in the Student Center',
+                    date: new Date(Date.now() - 3600000).toISOString()
+                },
+                {
+                    type: 'found',
+                    title: 'Item Found',
+                    description: 'Someone found your calculator in the Library',
+                    date: new Date(Date.now() - 7200000).toISOString()
+                }
+            ];
+            localStorage.setItem('userActivities_' + currentUser.email, JSON.stringify(activities));
+
+            // Sample posts
+            const posts = [
+                {
+                    type: 'lost',
+                    title: 'Lost Wallet',
+                    description: 'Black leather wallet lost in Student Center',
+                    date: new Date(Date.now() - 86400000).toISOString(),
+                    status: 'pending'
+                },
+                {
+                    type: 'found',
+                    title: 'Found Calculator',
+                    description: 'Scientific calculator found in Library',
+                    date: new Date(Date.now() - 172800000).toISOString(),
+                    status: 'resolved'
+                }
+            ];
+            localStorage.setItem('userPosts_' + currentUser.email, JSON.stringify(posts));
+
+            // Sample notifications
+            const notifications = [
+                {
+                    id: 1,
+                    type: 'match',
+                    title: 'Potential Match Found',
+                    message: 'Someone found an item matching your lost wallet description',
+                    date: new Date(Date.now() - 1800000).toISOString(),
+                    read: false
+                },
+                {
+                    id: 2,
+                    type: 'system',
+                    title: 'Welcome to UMT Belongings Hub',
+                    message: 'Thank you for joining our community',
+                    date: new Date(Date.now() - 3600000).toISOString(),
+                    read: true
+                }
+            ];
+            localStorage.setItem('userNotifications_' + currentUser.email, JSON.stringify(notifications));
+
+            // Reload all data
+            loadActivityData();
+            loadUserPosts();
+            loadNotifications();
+        }
+
+        // Add sample data when there's none
+        if (!localStorage.getItem('userActivities_' + JSON.parse(localStorage.getItem('currentUser')).email)) {
+            addSampleData();
+        }
+    </script>
+</body>
+</html>
