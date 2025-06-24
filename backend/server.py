@@ -21,15 +21,6 @@ OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 # Initialize FastAPI app
 app = FastAPI(title="UMT Belongings Hub API", version="1.0.0")
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["*"],
-)
-
 # MongoDB connection
 client = AsyncIOMotorClient(MONGO_URL)
 db = client.umt_belongings_hub
