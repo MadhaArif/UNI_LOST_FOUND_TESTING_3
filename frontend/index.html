@@ -2649,7 +2649,192 @@
 
 
 
-        // Enhanced Image Similarity Search for Lost and Found System
+        // Visual Search Implementation
+        async function handleVisualSearch(file) {
+            if (!file) {
+                Swal.fire({
+                    title: 'No Image Selected',
+                    text: 'Please select an image to search for similar items.',
+                    icon: 'warning'
+                });
+                return;
+            }
+
+            // Convert file to base64
+            const base64Image = await convertFileToBase64(file);
+            
+            if (!base64Image) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Failed to process the image. Please try again.',
+                    icon: 'error'
+                });
+                return;
+            }
+
+            // Prepare search data
+            const searchData = {
+                imageBase64: base64Image,
+                searchType: "both" // Can search both lost and found items
+            };
+
+            try {
+                // Show loading in results container
+                const resultsContainer = document.getElementById('similarItemsResults');
+                resultsContainer.innerHTML = `
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Analyzing image...</span>
+                        </div>
+                        <p class="mt-2">Analyzing your image and searching for similar items...</p>
+                    </div>
+                `;
+
+                // Call backend Visual Search API
+                const response = await fetch('/api/search/visual', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(searchData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // Display visual search results
+                    displayVisualSearchResults(result.items);
+                    
+                    // Show success message
+                    Swal.fire({
+                        title: 'Visual Search Complete',
+                        text: result.message,
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    // Show no results message
+                    resultsContainer.innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            ${result.message || 'No visually similar items found'}
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Visual search error:', error);
+                
+                // Show error message
+                const resultsContainer = document.getElementById('similarItemsResults');
+                resultsContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Failed to perform visual search. Please try again.
+                    </div>
+                `;
+                
+                Swal.fire({
+                    title: 'Visual Search Failed',
+                    text: 'There was an error processing your image. Please try again.',
+                    icon: 'error'
+                });
+            }
+        }
+
+        // Convert file to base64
+        function convertFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    // Remove the data:image/jpeg;base64, part to get just the base64 string
+                    const base64String = reader.result.split(',')[1];
+                    resolve(base64String);
+                };
+                reader.onerror = (error) => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Display visual search results
+        function displayVisualSearchResults(items) {
+            const resultsContainer = document.getElementById('similarItemsResults');
+            
+            if (!items || items.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No visually similar items found. Try a different image or check back later.
+                    </div>
+                `;
+                return;
+            }
+
+            resultsContainer.innerHTML = '<h4 class="mb-3">Visually Similar Items Found</h4>';
+
+            const itemsGrid = document.createElement('div');
+            itemsGrid.className = 'row';
+
+            items.forEach(item => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'col-md-6 col-lg-4 mb-3';
+                
+                itemCard.innerHTML = `
+                    <div class="card h-100 similar-item-card" style="cursor: pointer;">
+                        <img src="${item.image || 'https://via.placeholder.com/300x200?text=No+Image'}" 
+                             class="card-img-top" alt="${item.title}" 
+                             style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h6 class="card-title">${item.title}</h6>
+                            <p class="card-text small">
+                                <i class="fas fa-tag me-1"></i>${item.category}<br>
+                                <i class="fas fa-map-marker-alt me-1"></i>${item.location}<br>
+                                <i class="far fa-calendar-alt me-1"></i>${new Date(item.date || item.createdAt).toLocaleDateString()}
+                            </p>
+                            <p class="card-text small">${item.description.substring(0, 80)}...</p>
+                            ${item.type ? `<span class="badge bg-${item.type === 'lost' ? 'danger' : 'success'} mb-2">${item.type.toUpperCase()}</span>` : ''}
+                        </div>
+                        <div class="card-footer bg-transparent p-2">
+                            <button class="btn btn-sm btn-primary w-100" onclick='viewItemDetails(${JSON.stringify(item).replace(/'/g, "\\'")})'> 
+                                <i class="fas fa-eye me-1"></i>View Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                itemsGrid.appendChild(itemCard);
+            });
+
+            resultsContainer.appendChild(itemsGrid);
+        }
+
+        // Initialize Visual Search
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageUpload = document.getElementById('imageUpload');
+            const imagePreview = document.getElementById('imagePreview');
+            
+            if (imageUpload && imagePreview) {
+                imageUpload.addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+                    
+                    if (file) {
+                        // Show image preview
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            imagePreview.src = e.target.result;
+                            imagePreview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                        
+                        // Automatically trigger visual search
+                        setTimeout(() => {
+                            handleVisualSearch(file);
+                        }, 500);
+                    }
+                });
+            }
+        });
 function initImageSimilarity(uploadInputId, previewId, resultsId) {
     // Check for required dependencies
     function checkDependencies() {
