@@ -2480,6 +2480,52 @@
             // Redirect to the details page
             window.location.href = 'item-details.html';
         }
+
+        // Claim item function
+        function claimItem(itemId) {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            if (!currentUser) {
+                Swal.fire({
+                    title: 'Login Required',
+                    text: 'You need to be logged in to claim this item.',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sign In',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const loginModal = new bootstrap.Modal(document.getElementById('loginTypeModal'));
+                        loginModal.show();
+                    }
+                });
+                return;
+            }
+
+            // Show claim confirmation
+            Swal.fire({
+                title: 'Claim This Item',
+                text: 'Are you sure this item belongs to you?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Claim It',
+                cancelButtonText: 'Cancel',
+                input: 'textarea',
+                inputLabel: 'Additional Information (Optional)',
+                inputPlaceholder: 'Provide any additional details to help verify your ownership...'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Simulate claim submission
+                    Swal.fire({
+                        title: 'Claim Submitted!',
+                        html: `Your claim has been submitted successfully.<br><br>
+                               We'll contact you at <strong>${currentUser.email}</strong> with further instructions.<br><br>
+                               <p>Reference #: ${Math.floor(100000 + Math.random() * 900000)}</p>`,
+                        icon: 'success'
+                    });
+                }
+            });
+        }
         //QR-CODE JS
         document.addEventListener('DOMContentLoaded', function () {
             const currentUser = JSON.parse(localStorage.getItem('currentUser'));
