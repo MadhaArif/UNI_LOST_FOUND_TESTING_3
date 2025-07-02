@@ -65,12 +65,18 @@ class VisualSearchHandler {
         const searchBtn = document.getElementById('visualSearchBtn');
         if (searchBtn) {
             searchBtn.style.display = 'block';
-            this.currentImageData = imageDataUrl;
+            // Store the actual file object for upload, not the data URL
+            const imageUpload = document.getElementById('imageUpload');
+            if (imageUpload && imageUpload.files && imageUpload.files.length > 0) {
+                this.currentImageFile = imageUpload.files[0];
+            } else {
+                this.currentImageFile = null; // Should not happen if imageUpload triggered this
+            }
         }
     }
 
     async performVisualSearch() {
-        if (!this.currentImageData) {
+        if (!this.currentImageFile) { // Check for file instead of data URL
             alert('Please upload an image first.');
             return;
         }
@@ -88,27 +94,29 @@ class VisualSearchHandler {
                 resultsContainer.innerHTML = '<div class="text-center"><i class="fas fa-search fa-2x text-primary mb-3"></i><p>Analyzing image and searching for similar items...</p></div>';
             }
 
-            // Prepare search data
-            const searchData = {
-                imageBase64: this.currentImageData,
-                searchType: 'both' // Search both lost and found items
-            };
+            // Prepare search data with FormData for file upload
+            const formData = new FormData();
+            formData.append('image', this.currentImageFile);
+            // If you need to specify the type (e.g., 'FOUND' or 'LOST') for the search,
+            // you can add it to formData or as a query parameter in the URL.
+            // For now, assuming the backend's find-similar handles type implicitly or defaults.
 
-            // Make API call
-            const response = await fetch('/api/search/visual', {
+            // Make API call to the correct endpoint
+            const response = await fetch('/api/posts/find-similar', { // Corrected endpoint
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(searchData)
+                // 'Content-Type' header is automatically set by browser for FormData
+                body: formData
             });
 
-            const result = await response.json();
+            // The backend /api/posts/find-similar returns an array of items directly, not an object with 'success' and 'items'
+            const items = await response.json();
 
-            if (result.success) {
-                this.displayVisualSearchResults(result.items);
+            if (response.ok) {
+                this.displayVisualSearchResults(items);
             } else {
-                this.displayErrorMessage(result.message || 'Search failed. Please try again.');
+                // Attempt to get an error message from the response, or use a default
+                const errorResult = items; // items might contain error details if not ok
+                this.displayErrorMessage(errorResult.message || 'Search failed. Please try again.');
             }
 
         } catch (error) {
